@@ -1,5 +1,5 @@
 ---
-title: "overview"
+title: "Overview"
 description: |
   A new article created using the Distill format.
 output: distill::distill_article
@@ -9,8 +9,7 @@ output: distill::distill_article
 knitr::opts_chunk$set(echo = FALSE)
 ```
 
-# Overview
-
+## Objective
 The Visual Analytics Science and Technology (VAST) Challenge aims to advance visual analytics through a series of
 competitions. The IEEE VAST Challenge 2021 is structured similarly to previous challenge in 2014, with similar data sets albeit slightly different questions. The VAST Challenge 2021 consists of three independent mini-challenges. We will be focusing on Mini Challenge 2 in this blog post.
 
@@ -18,7 +17,19 @@ In this blog post, we will firstly review previous visualizations to identify ga
 
 Mini-Challenge 2 requires the analyst to analyze movement and tracking data, given tracking data for the two weeks leading up to the disappearance, as well as credit card transactions and loyalty card usage data. This assignment aims to identify anomalies and suspicious behaviors, infer the owners of each credit card and loyalty card and identify potential informal or unofficial relationships among GASTech personnel.
 
-# Literature Review of previous analysis
+## Mini Challenge 2 Background
+
+Many of the Abila, Kronos-based employees of GAStech have company cars which are approved for both personal and business use. Those who do not have company cars have the ability to check out company trucks for business use, but these trucks cannot be used for personal business.
+
+Employees with company cars are happy to have these vehicles, because the company cars are generally much higher quality than the cars they would be able to afford otherwise. However, GAStech does not trust their employees. Without the employees? knowledge, GAStech has installed geospatial tracking software in the company vehicles. The vehicles are tracked periodically as long as they are moving.
+
+This vehicle tracking data has been made available to law enforcement to support their investigation. Unfortunately, data is not available for the day the GAStech employees went missing. Data is only available for the two weeks prior to the disappearance.
+
+To promote local businesses, Kronos based companies provide a Kronos Kares benefit card to GASTech employees giving them discounts and rewards in exchange for collecting information about their credit card purchases and preferences as recorded on loyalty cards. This data has been made available to investigators in the hopes that it can help resolve the situation. However, Kronos Kares does not collect personal information beyond purchases.
+
+As a visual analytics expert assisting law enforcement, your mission is to identify which GASTech employees made which purchases and identify suspicious patterns of behavior. You must cope with uncertainties that result from missing, conflicting, and imperfect data to make recommendations for further investigation.
+
+## Literature Review of previous analysis
 
 The main aim of the assignment is to identify anomalies between the data provided and use those data sources to draw relationships. In order to do so, we would need to perform exploratory data analysis (EDA) to analyze data and gain insights. Effective visual data mining needs to display data in ways that human minds can easily perceive patterns and relationships in the data.
 
@@ -37,7 +48,7 @@ When exploring unexpected structure in graphics, it is useful to have selections
 
 ![Figure 2: Static barcharts <br> Source: https://www.census.gov/programs-surveys/acs/](Image/BarChartEx.JPG)
 
-# Suggested visualisations and R packages
+## Suggested visualisations and R packages
 
 There are gaps in the current visualizations in supporting the intended analysis of this assignment. The majority of visualizations are largely static and hence are unable to reflect a comprehensive overview of the multivariate data.
 

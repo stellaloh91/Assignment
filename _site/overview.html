@@ -86,14 +86,14 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 </style>
 
   <!--radix_placeholder_meta_tags-->
-  <title>Assignment: overview</title>
+  <title>Assignment: Overview</title>
 
   <meta property="description" itemprop="description" content="A new article created using the Distill format."/>
 
 
 
   <!--  https://developers.facebook.com/docs/sharing/webmasters#markup -->
-  <meta property="og:title" content="Assignment: overview"/>
+  <meta property="og:title" content="Assignment: Overview"/>
   <meta property="og:type" content="article"/>
   <meta property="og:description" content="A new article created using the Distill format."/>
   <meta property="og:locale" content="en_US"/>
@@ -101,14 +101,14 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 
   <!--  https://dev.twitter.com/cards/types/summary -->
   <meta property="twitter:card" content="summary"/>
-  <meta property="twitter:title" content="Assignment: overview"/>
+  <meta property="twitter:title" content="Assignment: Overview"/>
   <meta property="twitter:description" content="A new article created using the Distill format."/>
 
   <!--/radix_placeholder_meta_tags-->
   <!--radix_placeholder_rmarkdown_metadata-->
 
   <script type="text/json" id="radix-rmarkdown-metadata">
-  {"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["title","description","output"]}},"value":[{"type":"character","attributes":{},"value":["overview"]},{"type":"character","attributes":{},"value":["A new article created using the Distill format.\n"]},{"type":"character","attributes":{},"value":["distill::distill_article"]}]}
+  {"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["title","description","output"]}},"value":[{"type":"character","attributes":{},"value":["Overview"]},{"type":"character","attributes":{},"value":["A new article created using the Distill format.\n"]},{"type":"character","attributes":{},"value":["distill::distill_article"]}]}
   </script>
   <!--/radix_placeholder_rmarkdown_metadata-->
   <!--radix_placeholder_navigation_in_header-->
@@ -2053,7 +2053,7 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 <!--radix_placeholder_front_matter-->
 
 <script id="distill-front-matter" type="text/json">
-{"title":"overview","description":"A new article created using the Distill format.","authors":[]}
+{"title":"Overview","description":"A new article created using the Distill format.","authors":[]}
 </script>
 
 <!--/radix_placeholder_front_matter-->
@@ -2063,8 +2063,10 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 <div class="nav-left">
 <a href="index.html" class="title">Assignment</a>
 <a href="overview.html">Overview</a>
+<a href="eda.html">Data Exploration</a>
 <a href="methodology.html">Methodology</a>
 <a href="insights.html">Insights</a>
+<a href="conclusion.html">Conclusion</a>
 </div>
 <div class="nav-right">
 <a href="index.html">Home</a>
@@ -2078,7 +2080,7 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 <!--/radix_placeholder_site_before_body-->
 
 <div class="d-title">
-<h1>overview</h1>
+<h1>Overview</h1>
 <!--radix_placeholder_categories-->
 <!--/radix_placeholder_categories-->
 <p><p>A new article created using the Distill format.</p></p>
@@ -2086,11 +2088,17 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 
 
 <div class="d-article">
-<h1 id="overview">Overview</h1>
+<h2 id="objective">Objective</h2>
 <p>The Visual Analytics Science and Technology (VAST) Challenge aims to advance visual analytics through a series of competitions. The IEEE VAST Challenge 2021 is structured similarly to previous challenge in 2014, with similar data sets albeit slightly different questions. The VAST Challenge 2021 consists of three independent mini-challenges. We will be focusing on Mini Challenge 2 in this blog post.</p>
 <p>In this blog post, we will firstly review previous visualizations to identify gaps where interactive visual analytics approach can be used to enhance user experience. Next, we will prepare the proposed interactive data analysis techniques to answer the Mini Challenge 2 questions.</p>
 <p>Mini-Challenge 2 requires the analyst to analyze movement and tracking data, given tracking data for the two weeks leading up to the disappearance, as well as credit card transactions and loyalty card usage data. This assignment aims to identify anomalies and suspicious behaviors, infer the owners of each credit card and loyalty card and identify potential informal or unofficial relationships among GASTech personnel.</p>
-<h1 id="literature-review-of-previous-analysis">Literature Review of previous analysis</h1>
+<h2 id="mini-challenge-2-background">Mini Challenge 2 Background</h2>
+<p>Many of the Abila, Kronos-based employees of GAStech have company cars which are approved for both personal and business use. Those who do not have company cars have the ability to check out company trucks for business use, but these trucks cannot be used for personal business.</p>
+<p>Employees with company cars are happy to have these vehicles, because the company cars are generally much higher quality than the cars they would be able to afford otherwise. However, GAStech does not trust their employees. Without the employees? knowledge, GAStech has installed geospatial tracking software in the company vehicles. The vehicles are tracked periodically as long as they are moving.</p>
+<p>This vehicle tracking data has been made available to law enforcement to support their investigation. Unfortunately, data is not available for the day the GAStech employees went missing. Data is only available for the two weeks prior to the disappearance.</p>
+<p>To promote local businesses, Kronos based companies provide a Kronos Kares benefit card to GASTech employees giving them discounts and rewards in exchange for collecting information about their credit card purchases and preferences as recorded on loyalty cards. This data has been made available to investigators in the hopes that it can help resolve the situation. However, Kronos Kares does not collect personal information beyond purchases.</p>
+<p>As a visual analytics expert assisting law enforcement, your mission is to identify which GASTech employees made which purchases and identify suspicious patterns of behavior. You must cope with uncertainties that result from missing, conflicting, and imperfect data to make recommendations for further investigation.</p>
+<h2 id="literature-review-of-previous-analysis">Literature Review of previous analysis</h2>
 <p>The main aim of the assignment is to identify anomalies between the data provided and use those data sources to draw relationships. In order to do so, we would need to perform exploratory data analysis (EDA) to analyze data and gain insights. Effective visual data mining needs to display data in ways that human minds can easily perceive patterns and relationships in the data.</p>
 <p>Most visualizations show geographically-referenced movement data use conventional Geographic Information Systems (GIS). Movement data are represented as lines on the map. The most basic form is a line between two points which gives information about the movement of an object. Trajectory data can help in understanding of flow during an unusual event. Real world data sets typically do not provide singular trajectories. Instead, multiple trajectories tend to be mapped, as seen in Figure 1. However, when large data sets are involved, these trajectory lines tend to overlap, resulting in visual clutter and occlusions and makes the trajectory of individual lines illegible.</p>
 <p>One way to overcome this is to adjust the opacity of the lines. This leads to less clutter. However, it results in data loss as some of the data may be hidden in order to reflect higher density areas (high frequency of trajectories). An alternative is to differentiate each line using colors, as what is done in Figure 1 below. Although this makes the lines with distinctive colors clearer, it does not resolve the constraint of large data sets as these lines still overlap and some colors may look similar since there is not enough colors to cover the whole data set. Interactive filtering allows for one to better manage large data sets with multiple trajectories, by selecting which trajectories are viewed at any one time.</p>
@@ -2103,7 +2111,7 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 <figure>
 <img src="Image/BarChartEx.JPG" alt="Figure 2: Static barcharts   Source: https://www.census.gov/programs-surveys/acs/" /><figcaption aria-hidden="true">Figure 2: Static barcharts <br> Source: <a href="https://www.census.gov/programs-surveys/acs/" class="uri">https://www.census.gov/programs-surveys/acs/</a></figcaption>
 </figure>
-<h1 id="suggested-visualisations-and-r-packages">Suggested visualisations and R packages</h1>
+<h2 id="suggested-visualisations-and-r-packages">Suggested visualisations and R packages</h2>
 <p>There are gaps in the current visualizations in supporting the intended analysis of this assignment. The majority of visualizations are largely static and hence are unable to reflect a comprehensive overview of the multivariate data.</p>
 <p>The full potential of interactivity in geovisualization lies in coordinated link view (CLV). CLV is a common data visualization technique that allows the manipulation of visual presentation in different ways as well as coordinating the interaction between the different views. It is typically combined with brushing, which involves selecting specific objects by hovering over them or selecting them in the chart. These techniques make the use of multiple views more than the sum of its parts.</p>
 <p>In this assignment, we will attempt to create interactive visualizations for multivariate analysis of geographically-referenced movement data, as well as the credit card and loyalty information provided. The focus will be on identifying potential relationships between each employee so as to identify potentially suspicious activity from the interactions observed.</p>

@@ -1,16 +1,20 @@
 name: "Assignment"
 title: "Assignment"
 description: |
-  My Website
+  This website is an attempt on the Vast Challenge 2021- Mini Challenge 2.
 output_dir: "_site"
 navbar:
   left:
     - text: "Overview"
       href: overview.html
+    - text: "Data Exploration"
+      href: eda.html
     - text: "Methodology"
       href: methodology.html
     - text: "Insights"
       href: insights.html
+    - text: "Conclusion"
+      href: conclusion.html      
   right:
     - text: "Home"
       href: index.html
