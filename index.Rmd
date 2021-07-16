@@ -1,7 +1,7 @@
 ---
-title: "My Website"
+title: "My Analytics Journey"
 description: |
-  Welcome to the website. I hope you enjoy it!
+  Welcome to the website. This is my attempt on Vast Challenge 2021, MC2. Feel free to reach out with any comments!
 site: distill::distill_website
 ---
 <style>

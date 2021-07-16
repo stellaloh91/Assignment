@@ -1,12 +1,23 @@
 ---
 title: "Data Exploration"
 description: |
-  A new article created using the Distill format.
+  Visual exploration of data provided
 output: distill::distill_article
 ---
+<style>
+
+body{
+  background-color: #EBEDEF;
+  font-family:helvetica;
+}
+</style>
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(fig.retina = 3,
+                      echo = FALSE,
+                      eval = TRUE,
+                      message = FALSE,
+                      warning = FALSE)
 ```
 
 ## Data Preparation
@@ -32,7 +43,7 @@ for (p in packages){
 The data provided consists of four CSV files, a tourist map and geospatial data files- read_csv() is used to import each CSV file into R. 
 
 Data source       | Data
----------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------
 cc_data           | Timestamp and transaction amount of credit cards at each location
 loyalty_data      | Timestamp and transaction amount of loyalty cards at each location
 car-assignments   | Name, employment type and employment title of each employee assigned to a carID
@@ -45,7 +56,9 @@ We note that there are some issues with the imported data:
     - ID and CarID are in double format instead of factor
 
 We will correct the issues above in the next section.
+
 ```{r}
+##Import data
 loyalty_data <- read_csv("data/loyalty_data.csv")
 glimpse(loyalty_data)
 
@@ -63,36 +76,43 @@ glimpse(assignment_data)
 
 Before working on the data frames, we need to explore and prepare each data frame.
 ```{r}
-## Loyalty data
+##Loyalty data
 loyalty_data$timestamp <- date_time_parse(loyalty_data$timestamp,
                                  zone = "",
                                  format = "%m/%d/%Y") 
 
 loyalty_data_cleaned <- loyalty_data %>%
-  mutate(day_of_wk = as_weekday(timestamp), day = get_day(timestamp)) %>%
+  mutate(weekday = weekdays(timestamp), day = get_day(timestamp)) %>%
   rename("date" = "timestamp") 
 
 loyalty_data_cleaned$location <- iconv(loyalty_data_cleaned$location, to='ASCII//TRANSLIT')
+loyalty_data_cleaned
+```
 
+```{r}
 # Credit card data
 cc_data$timestamp <- date_time_parse(cc_data$timestamp,
                                  zone = "",
                                  format = "%m/%d/%Y %H:%M")
 
 cc_data_cleaned <- cc_data %>% 
-  mutate(date = as_date(cc_data$timestamp), day_of_wk = as_weekday(timestamp), day = get_day(timestamp), hour = get_hour(cc_data$timestamp)) 
+  mutate(date = as_date(cc_data$timestamp), weekday = weekdays(timestamp), day = get_day(timestamp), hour = get_hour(cc_data$timestamp)) 
 
 cc_data_cleaned$location <- iconv(cc_data_cleaned$location, to='ASCII//TRANSLIT')
 cc_data_cleaned$last4ccnum = as_factor(cc_data_cleaned$last4ccnum)
 cc_data_cleaned
+```
 
+```{r}
 # GPS data
 gps_data$Timestamp <- date_time_parse(gps_data$Timestamp,
                                  zone = "",
                                  format = "%m/%d/%Y %H:%M:%S")
 gps_data$id <- as_factor(gps_data$id)
 gps_data
+```
 
+```{r}
 # Assignment data
 assignment_data$CarID <- as_factor(assignment_data$CarID)
 assignment_data
@@ -118,6 +138,7 @@ We will first perform exploratory data analysis, employing visualization to aid 
 
 #### Missing values
 ```{r}
+##loyalty card
 missing.values_loyalty <- loyalty_data_cleaned %>%
   gather(key = "key", value = "val") %>%
   mutate(isna = is.na(val)) %>%
@@ -143,7 +164,10 @@ percentage.plot_loyalty <- missing.values_loyalty %>%
       theme(legend.position = "none") 
 
 ggplotly(percentage.plot_loyalty, tooltip = c("text"))
+```
 
+```{r}
+##credit card
 missing.values_cc <- cc_data_cleaned %>%
   gather(key = "key", value = "val") %>%
   mutate(isna = is.na(val)) %>%
@@ -169,7 +193,10 @@ percentage.plot_cc <- missing.values_cc %>%
       theme(legend.position = "none") 
 
 ggplotly(percentage.plot_cc, tooltip = c("text"))
+```
 
+```{r}
+##location data
 missing.values_gps_carid <- location_carid_join %>%
   gather(key = "key", value = "val") %>%
   mutate(isna = is.na(val)) %>%
@@ -204,6 +231,7 @@ From the above plot, LastName, FirstName, CurrentEmploymentType and CurrentEmplo
 The distributions are examined from the density curves of the variables using ggplot().
 
 ```{r}
+##loyalty card
 check_distribution_loyalty <- loyalty_data_cleaned %>%
   ggplot(aes(x=price)) +
   geom_density() +
@@ -211,7 +239,10 @@ check_distribution_loyalty <- loyalty_data_cleaned %>%
   theme_minimal() +
   theme(panel.border = element_rect(colour="grey60", fill = NA),
         strip.background = element_rect(fill = "grey80"))
+```
 
+```{r}
+##credit card
 check_distribution_cc <- cc_data_cleaned %>%
   ggplot(aes(x=price)) +
   geom_density() +
@@ -223,9 +254,11 @@ check_distribution_cc <- cc_data_cleaned %>%
 ggplotly(check_distribution_loyalty)
 ggplotly(check_distribution_cc)
 ```
+
 From the above distributions, we can see that the range of values differ greatly. In order to observe the distributions clearly, we will re-scale the data using log transformation. 
 
 ```{r}
+##loyalty card
 check_distribution_loyalty_log <- loyalty_data %>%
   ggplot(aes(x=price)) +
   geom_density() +
@@ -234,8 +267,10 @@ check_distribution_loyalty_log <- loyalty_data %>%
         strip.background = element_rect(fill = "grey80")) + 
   scale_x_log10() +
   labs(title = "Distribution of loyalty card spending after log transformation", x = 'price (log scale)', y = "density")
+```
 
-
+```{r}
+##credit card
 check_distribution_cc_log <- cc_data %>%
   ggplot(aes(x=price)) +
   geom_density() +
@@ -248,11 +283,13 @@ check_distribution_cc_log <- cc_data %>%
 ggplotly(check_distribution_loyalty_log)
 ggplotly(check_distribution_cc_log)
 ```
+
 The distributions of the log-transformed variables now approximates to the normal distribution.
 
 We have also plotted the total spent per day in each store for both loyalty and credit card data. As seen in the figures below, the spending differs greatly between stores (note free scales). However, total spending per day from credit card and loyalty card data follows the same trending.
 
 ```{r}
+##loyalty card
 summ_loyalty_data <- loyalty_data_cleaned %>%
   group_by(location, date) %>%
   summarise(total_spent = sum(price))
@@ -266,6 +303,11 @@ check_distribution_loyalty_location <- summ_loyalty_data %>%
   theme(panel.border = element_rect(colour="grey60", fill = NA),
         strip.background = element_rect(fill = "grey80"),panel.spacing = unit(2, "lines"))
 
+ggplotly(check_distribution_loyalty_location)
+```
+
+```{r}
+##credit card
 summ_cc_data <- cc_data_cleaned %>%
   group_by(location, date) %>%
   summarise(total_spent = sum(price))
@@ -279,7 +321,6 @@ check_distribution_cc_location <- summ_cc_data %>%
   theme(panel.border = element_rect(colour="grey60", fill = NA),
         strip.background = element_rect(fill = "grey80"),panel.spacing = unit(2, "lines"))
   
-ggplotly(check_distribution_loyalty_location)
 ggplotly(check_distribution_cc_location)
 ```
 
@@ -288,6 +329,9 @@ ggplotly(check_distribution_cc_location)
 The outliers are also examined using ggplot().
 
 ```{r}
+##loyalty card
+loyalty_data_cleaned$date <- as.character(loyalty_data_cleaned$date)
+
 d <- highlight_key(loyalty_data_cleaned)
 m <- list(l=50, r=50, b=150, t=0, pad=2)
 
@@ -298,6 +342,11 @@ boxplot_loyalty_plot <- plot_ly(height = 600, d, y = ~location, x = ~price) %>%
 
 gg <- highlight(ggplotly(boxplot_loyalty_plot), "plotly_selected")
 crosstalk::bscols(gg,DT::datatable(d), widths = 15)
+```
+
+```{r}
+##credit card
+cc_data_cleaned$timestamp <- as.character(cc_data_cleaned$timestamp)
 
 d1 <- highlight_key(cc_data_cleaned)
 
@@ -311,6 +360,3 @@ crosstalk::bscols(gg,DT::datatable(d1), widths = 15)
 ```
 
 Using the interactive plots above, we are able to select the outliers and this filters the linked datatable for the relevant transaction, giving additional insight such as the card number. For example, we observe a $10,000 transaction by card ending with 9551 at Frydos Autosupply n'More but not a corresponding transaction on the loyalty card.
-
-
-
