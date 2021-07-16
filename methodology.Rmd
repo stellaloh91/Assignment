@@ -708,6 +708,7 @@ Uncertainties in data:
 
 ### Qn4- Given the data sources provided, identify potential informal or unofficial relationships among GASTech personnel. Provide evidence for these relationships. 
 
+We will first create a network graph using the following code chunks.
 ```{r}
 ##Prepare data
 cc_carid_emp_match <- cc_carid_match %>%
@@ -780,36 +781,9 @@ cc_edges <- select(cc_edges, from, to, day, hour, timegroup, weight)
 cc_graph <- tbl_graph(nodes = cc_nodes,
                       edges = cc_edges,
                       directed = FALSE)
-cc_graph
-ggraph(cc_graph, layout = "lgl") +
-  geom_edge_link(aes()) +
-  geom_node_point(aes()) +
-  theme_graph()
 ```
 
-```{r}
-visNetwork(cc_nodes, cc_edges) %>%
-  visIgraphLayout(layout = "layout_with_fr") %>%
-  visLegend() %>%
-  visLayout(randomSeed = 123)
-```
-
-```{r}
-##Facet
-set_graph_style()
-
-g <- ggraph(cc_graph, layout = "nicely") + 
-  geom_edge_link(aes(width = weight), alpha=0.2) +
-  scale_edge_width(range = c(0.1, 5)) +
-  geom_node_point(aes(colour = group), size = 2) 
-
-g + facet_edges(~day) +
-th_foreground(foreground = "grey80",
-border = TRUE) +
-theme(legend.position = 'bottom')
-```
-
-```{r, fig.width = 10, fig.height = 15}
+```{r, fig.width = 15, fig.height = 10}
 ##Facet
 cc_edges <- cc_edges %>%
   filter(day == 6)
@@ -831,7 +805,7 @@ theme(legend.position = 'bottom')
 ```
 
 ```{r}
-##Visualising network metrics- centrality indices
+##Visualizing network metrics- centrality indices
 g <- cc_graph %>%
   ggraph(layout = "fr") +
   geom_edge_link(aes(width = weight), alpha=0.2) +
@@ -839,20 +813,8 @@ g <- cc_graph %>%
   geom_node_point(aes(colour = group, size = centrality_betweenness()))
 g + theme_graph()
 ```
-
 ```{r}
-##Visualising network metrics- centrality indices
-g <- cc_graph %>%
-  ggraph(layout = "fr") +
-  geom_edge_link(aes(width = weight), alpha=0.2) +
-  scale_edge_width(range = c(0.1, 5)) +
-  geom_node_point(aes(colour = group, size = centrality_betweenness()))
-g + theme_graph()
-```
-
-
-```{r}
-##Visualising community
+##Visualizing community
 g <- cc_graph %>%
   mutate(community = as.factor(group_optimal(weights = weight))) %>%
   ggraph(layout = "fr") +
@@ -883,19 +845,34 @@ visNetwork(cc_nodes, cc_edges, height = "500px", width = "100%") %>%
 cc_data_cleaned_matched <- subset(cc_data_cleaned_matched, select = -c(timestamp, day, price))
 DT::datatable(cc_data_cleaned_matched, extensions='Scroller', filter = "top", fillContainer = T, options = list(scrollX=TRUE, autoWidth=TRUE, scroller=TRUE))
 ```
-Golf course- Several of the executives are playing golf at the Desafio Golf Course on Sundays (12/1/2014 at 1300-1400 and 19/1/2014 at 1200-1500), with Sten Sanjorge Jr and Orhan Strum joining during the second session.
+We have derived the following potential informal relationships between employees.
 
-Chostus hotel- We see Elsa Orilla and Brand Tempestad from Engineering checking into Chostus Hotel frequently on weekdays during lunch hour. On further investigation, there are 2 employees with last name Orilla. We do not have further information on whether there is a relationship between them. However, if they are partners, it may present as an illicit relationship given that it occurs frequently during lunch hours on weekdays when Kare Orilla is having lunch elsewhere.
+1) Desafio Golf course- Several of the executives were congregated at the Desafio Golf Course on Sundays. Willem Vasco-Pais (Environmental Safety Advisor), Ingrid Barranco(SVP/CFO) and Ada Camp-Corrente (SVP/CIO) were present on 12/1/2014 at 1300-1400 and 19/1/2014 at 1200-1500. Sten Sanjorge Jr (President/CEO) and Orhan Strum (SVP/COO) joining during the second session.
 
-Kronos Mart- Transactions noted on odd hours such as on 19/1/2014 at 0300 where Varja Lagos, Nils Calixto and Ada Campo-Corrente made purchases during the same hour.
+2) Chostus Hotel- We see Elsa Orilla (Drill Technician) and Brand Tempestad (Drill Technician) from Engineering department checking into Chostus Hotel frequently on weekdays during lunch hour, up to four times over the two weeks observed. On further investigation, there are two employees with last name Orilla. We do not have further information on whether there is a relationship between them. However if they are partners, this may present as an illicit relationship given that it occurs frequently during lunch hours on weekdays when Kare Orilla is having lunch elsewhere.
 
-Abila Airport, Kronos Irrigation, Nationwide Refinery and Maximum Iron and Steel, Steward and Sons Chemical, Carlyle Chemical are visited by only Facilities department, though usually not at the same time.
+3) Kronos Mart- Transactions noted on odd hours such as on 19/1/2014 at 0300 where Varja Lagos (Badging Office), Nils Calixto (IT Helpdesk) and Ada Campo-Corrente (SVP/CIO) made purchases during the same hour.
 
-Coffee Shack is visited by only 1 person- 7117 during lunch hour on most weekdays
+4) There were several locations only frequented by the Facilities department, such as Abila Airport, Kronos Pipe and Irrigation, Nationwide Refinery, Maximum Iron and Steel, Stewart and Sons Fabrication and Carlyle Chemical. Their visits are usually not at the same time.
 
-Been There Done That is visited by only by the Engineering team during lunch hour on most weekdays lunch
+5) Coffee Shack is visited by only one person with last 4 credit card number 7117 during lunch hour, on most weekdays.
 
-Brewed Awakeings favoured by executives and some security staff during lunch
+6) Bean There Done That is popular with the Engineering team during lunch hour on most weekdays, with no transactions by these same group over the weekends.
+
+7) Brewed Awakenings is favoured by Ingrid Barranco (SVP/CFO), Elsa Orilla (Drill Technician) and Ada Campo-Corrente (SVP/CIO) during lunch hour and they make purchases there frequently during the same periods, hence would probably have crossed paths here.
+
+8) Jack's Magical Beans is favoured by Isak Baza (IT Technician), Isande Borrasca (Drill Technician), Orhan Strum (SVP/COO), Willem Vasco-Pais (Environmental Safety Advisor) during lunch hour and they make purchases there frequently during the same periods, hence would probably have crossed paths here.
+
+9) Both Isia Vann (Perimeter Control) and Edvard Vann (Perimeter Control) have the same last name. We do not have further information on whether there is a relationship between them. However, on further investigation, they seem to have a close relationship given that there were multiple times where they made transactions in the same location during the same date and hour, such as the following:
+    - On 7/1/2014, 13/1/2014, 14/1/2014, they made transactions at Guy's Gyros at 2000-2100.
+    - On 8/1/2014, 9/1/2014, 10/1/2014, 13/1/2014, 14/1/2014, 15/1/2014, 16/1/2014 and 17/1/2014, they made transactions at Brew've Been Served at 0700-0800.
+    - On 14/1/2014, 19/1/2014, they made transactions at Katerina's Cafe at 1300.
+    
+10) Both Birgitta Frente (Geologist) and Vira Frente (Hydraulic Technician) have the same last name. We do not have further information on whether there is a relationship between them. However, on further investigation, they seem to have a not have a particularly close relationship as there was only one time where they made transactions in the same location during the same date and hour- On 13/1/2014 at Bean There Done That at 1200.
+
+11) There are other employees with the same last names such as Minke Mies and Henk Mies, Valeria Morlun and Adan Morlun, Claudio Hawelon and Benito Hawelon. However as some of them belong to the facilities truck drivers team, where due to the data limitations, we are unable to match each the CarID to Employee Name, we are unable to identify the routes of these truck drivers to determine if they were in the same location with the employees with similar last names.
+
+
 
 
 
