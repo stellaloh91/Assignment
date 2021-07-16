@@ -11,9 +11,22 @@ links:
 output:
   postcards::jolla
 ---
+
+<style>
+
+body{
+  background-color: #EBEDEF;
+  font-family:helvetica;
+}
+</style>
+
 I am a finance trained, aspiring data analyst living in Singapore. I currently work on the finance team at Nike Singapore. I am always up for a new adventure!
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(fig.retina = 3,
+                      echo = FALSE,
+                      eval = TRUE,
+                      message = FALSE,
+                      warning = FALSE)
 ```
 

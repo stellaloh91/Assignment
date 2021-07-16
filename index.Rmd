@@ -4,8 +4,19 @@ description: |
   Welcome to the website. I hope you enjoy it!
 site: distill::distill_website
 ---
+<style>
+
+body{
+  background-color: #EBEDEF;
+  font-family:helvetica;
+}
+</style>
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(fig.retina = 3,
+                      echo = FALSE,
+                      eval = TRUE,
+                      message = FALSE,
+                      warning = FALSE)
 ```
 
