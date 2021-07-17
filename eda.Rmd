@@ -29,7 +29,7 @@ All data extraction and wrangling are done in R using the tidyverse suite of pac
 The code chunk below is used to install and load packages for data preparation and exploration process:
 
 ```{r}
-packages = c('raster','clock', 'tmap', 'tidyverse', 'sf', 'readr', 'dplyr', 'plotly', 'tidyr', 'lubridate', 'gridExtra', 'knitr', 'stringr', 'ggplot2', 'crosstalk', 'DT', 'RColorBrewer', 'igraph', 'tidygraph', 'ggraph', 'visNetwork')
+packages = c('raster','clock', 'tmap', 'tidyverse', 'sf', 'readr', 'dplyr', 'plotly', 'tidyr', 'lubridate', 'gridExtra', 'knitr', 'stringr', 'ggplot2', 'crosstalk', 'DT', 'RColorBrewer', 'igraph', 'tidygraph', 'ggraph', 'visNetwork', 'mapview')
 for (p in packages){
   if(!require(p, character.only = T)){
     install.packages(p)
@@ -75,6 +75,7 @@ glimpse(assignment_data)
 ### Wrangle the data
 
 Before working on the data frames, we need to explore and prepare each data frame.
+
 ```{r}
 ##Loyalty data
 loyalty_data$timestamp <- date_time_parse(loyalty_data$timestamp,
@@ -330,8 +331,6 @@ The outliers are also examined using ggplot().
 
 ```{r}
 ##loyalty card
-loyalty_data_cleaned$date <- as.character(loyalty_data_cleaned$date)
-
 d <- highlight_key(loyalty_data_cleaned)
 m <- list(l=50, r=50, b=150, t=0, pad=2)
 
@@ -341,7 +340,8 @@ boxplot_loyalty_plot <- plot_ly(height = 600, d, y = ~location, x = ~price) %>%
   layout(xaxis = list(title = "Distribution of loyalty card spending (log scale)", tickangle = 0, ticks = "outside", ticklen = 2, tickwidth = 2, tickcolor = toRGB("black"),showgrid = T, showticklabels = TRUE, zeroline = F,  showline = T, type = "log", range = c(0, 4.1)), margin = m, yaxis = list(dtick= 1)) 
 
 gg <- highlight(ggplotly(boxplot_loyalty_plot), "plotly_selected")
-crosstalk::bscols(gg,DT::datatable(d), widths = 15)
+crosstalk::bscols(gg,DT::datatable(d) %>% 
+                    formatDate(1, method = 'toLocaleDateString'), widths = 15)
 ```
 
 ```{r}

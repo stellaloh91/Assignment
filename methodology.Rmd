@@ -19,7 +19,7 @@ body{
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(fig.retina = 3,
-                      echo = FALSE,
+                      echo = TRUE,
                       eval = TRUE,
                       message = FALSE,
                       warning = FALSE)
@@ -128,8 +128,7 @@ cc_data_loc_vol <- cc_data_cleaned %>%
 
 cc_loc_vol_bar <- plot_ly(cc_data_loc_vol, x = ~txn_count, y = ~location, type = "bar", hoverinfo = "text", 
                        text = ~paste("Transaction Volume:", cc_data_loc_vol$txn_count)) %>% 
-                      layout(title = "Credit card transaction Volume by Location", xaxis = list(title = "Transaction Volume", 
-                      zeroline = FALSE), yaxis = list(title = "Location", zeroline = FALSE, dtick= 1, categoryorder = "array", categoryarray = ~txn_count))
+                      layout(title = "Credit card transaction Volume by Location", xaxis = list(title = "Transaction Volume", zeroline = FALSE), yaxis = list(title = "Location", zeroline = FALSE, dtick= 1, categoryorder = "array", categoryarray = ~txn_count))
 
 cc_loc_vol_bar
 ```
@@ -190,7 +189,7 @@ loyalty_data_cleaned$daynumber = lubridate::wday(loyalty_data_cleaned$date, week
 loyalty_data_cleaned$weekday = factor(loyalty_data_cleaned$weekday, levels= c("Sunday", "Monday", 
                                              "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"))
 
-loyalty_data_cleaned$date = as.character(loyalty_data_cleaned$date)
+
 
 ##Plots
 shared_data_loyalty = SharedData$new(loyalty_data_cleaned, key = ~ location)
@@ -214,11 +213,11 @@ loyalty_wkday_vol <- shared_data_loyalty %>%
 bscols(widths = c(10,4),
   list(
     filter_select("location", "Please Specify the location", shared_data_loyalty, group =  ~location, multiple = F),
-    datatable(shared_data_loyalty)
-  ),
+    datatable(shared_data_loyalty) %>% formatDate(1, method = 'toLocaleDateString')),
   loyalty_wkday_vol
 )
 ```
+
 Given that we are provided with credit card timestamp information, we will take one step further to analyze the volume of credit card transactions by location and time.
 
 * Credit card spending*
@@ -237,7 +236,6 @@ Sys.setlocale("LC_TIME", "English")
 cc_data_cleaned$daynumber = lubridate::wday(cc_data_cleaned$timestamp, week_start = 1)
 cc_data_cleaned$weekday = factor(cc_data_cleaned$weekday, levels= c("Sunday", "Monday", 
                                              "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"))
-cc_data_cleaned$timestamp = as.character(cc_data_cleaned$timestamp)
 
 ## Preparing timegroup
 cc_data_cleaned$timegroup = ""
@@ -286,11 +284,10 @@ cc_timegroup_vol <-shared_data %>%
 bscols(widths = c(10,4),
   list(
     filter_select("location", "Please Specify the location", shared_data, group =  ~location, multiple = F),
-    datatable(shared_data)
-  ),
+    datatable(shared_data) %>% formatDate(1, method = 'toLocaleDateString'),
   cc_wkday_vol,
   cc_timegroup_vol
-)
+))
 ```
 
 As observed above, popular day of week differs for some of the locations such as Katerina's Cafe. This is unexpected as we would expect the trends to be similar for both cards.
@@ -571,6 +568,7 @@ By plotting the GPS coordinates using the Abila tourist map as background, we ar
 By following the GPS coordinates of each carID, we are then able to identify the time that they arrive at certain points of interest in the map. With this information, we can match the points of interest to the credit card at these locations, based on the timestamp on the GPS data and credit card data. After matching the unique CarID to the credit cards, we can then derive the owner of each card based on the car assignment data. using a facet map allows us to visualize the route for each car during each hour across each of the 14 days of GPS data in record. This allows for easy observation and matching to the credit card data.
 
 We have used an interative map and facet map below to visualize the route for CarID 1 across 1/6/2014. This allows for easy observation and matching to the credit card data. 
+
 ```{r}
 ##Plotting GPS paths- interactive map
 gps_path_selected <- gps_path_cleaned %>%
@@ -598,10 +596,12 @@ tm_shape(bgmap) +
   tm_facets(by = "hour", ncol = 3)
 ```
 BY visualizaing the route, we can filter the below credit card table for the relevant day, hour and location. The datatable below allows for multiple filters and this allows us to narrow down the list of credit cards which fits the criteria across the day. By repeating this process across the 14 days credit card transaction and location data provided, we will be able to match the credit card to CarID.
+
 ```{r}
 cc_data_cleaned_min <- subset(cc_data_cleaned, select = -c(daynumber, timestamp))
 DT::datatable(cc_data_cleaned_min, filter = "top", options = list(columnDefs = list(list(targets = 0:8, width = '10%'))))
 ```
+
 Based on interactive filtering and visualization of the maps above, we were able to match the GPS trajectories to the credit card data provided, based on location and timestamp. In the process, we noted that there car trajectories match more than 1 credit card match. This is seen for employees in the facilities department (carID: 29, 100 to 107). We also noted some credit cards without a CarID match.
 
 We have imported the match via a CSV file below.
@@ -618,6 +618,7 @@ glimpse(cc_carid_match )
 Using the above dataset, we will be able to identify the owners of each credit card by matching the carID to the car assignment dataset. We noted that Ovan Bertrand (Facilities Group Manager) uses 2 different credit cards. 
 
 In the car assignment dataset provided, truck drivers are not assigned to a particular truck number. Hence we are unable to identify which credit card belongs to which truck driver as there is no car assignment information provided. We have managed to match the trajectories of trucks to 9 different credit cards, which coincides with the number of truck drivers. Hence this reinforces our opinion that trucks are shared among the truck drivers. With the limited information, we are unable to match the credit card to truck driver, but only to the CarID.
+
 ```{r}
 ##Non-truck drivers
 cc_carid_emp_match_NT <- cc_carid_match %>%
@@ -632,19 +633,20 @@ cc_carid_emp_match_T <- cc_carid_match %>%
 ```
 
 After matching the timestamp of credit card transactions to CarID using the trajectory visualization, we can then match the credit card and loyalty card owners, using full join on 3 criteria match- 1) Date, 2) Location and 3) Price. 
+
 ```{r}
 ##Match loyalty and credit cards
 loyalty_cc_match <- cc_data_cleaned %>%
   full_join(loyalty_data_cleaned, by = c("date", "location", "price"))
 
-loyalty_cc_match$timestamp <- as.character(loyalty_cc_match$timestamp)
-loyalty_cc_match = subset(loyalty_cc_match, select = -c(day_of_wk.x, day_of_wk.y,day.y)) %>%
-  rename("day" = "day.x")
+loyalty_cc_match = subset(loyalty_cc_match, select = -c(day.y, daynumber.y, timestamp, weekday.y)) %>%
+  rename("day" = "day.x", "daynumber" = "daynumber.x", "weekday" = "weekday.x")
 
-DT::datatable(loyalty_cc_match )
+DT::datatable(loyalty_cc_match, extensions='Scroller', filter = "top", fillContainer = T, options = list(scrollX=TRUE, autoWidth=TRUE, scroller=TRUE)) %>% formatDate(4, method = 'toLocaleDateString')
 ```
 
 After the full join, we noted that there are some transactions whereby the amount recorded on the loyalty card and credit card is different, hence resulting in N/As in the joined dataset. To correct this, we will drop rows with N/As and perform a group to identify which loyalty cards are mapped to each credit card. 
+
 ```{r}
 ##Group by credit card number and loyalty card number
 loyalty_cc_match <- loyalty_cc_match %>%
@@ -660,9 +662,11 @@ loyalty_cc_match_count <- loyalty_cc_match %>%
 
 DT::datatable(loyalty_cc_match_count, filter = 'top', options = list(columnDefs = list(list(className = 'dt-center', targets = 0:2))))
 ```
+
 Based on the above results, we noted that there are seven credit cards mapped to more than 1 loyalty card. This is likely to be a duplicate due to the method being used to match both cards. We will investigate each match individually to identify if its a true match or simply a coincidence.
 
-After further investigation, it is noted that there are several transactions made on the same day for L3288 and L6267. Hence it is unlikely to be a coincidence. Loyalty card L3288 and L6267 are being used together with 2 credit cards. 
+After further investigation, it is noted that there are several transactions made on the same day for L3288 and L6267. Hence it is unlikely to be a coincidence. Loyalty card L3288 and L6267 are being used together with 2 credit cards.
+
 ```{r}
 loyalty_cc_match_count_filtered <- loyalty_cc_match_count %>%
   filter(loyalty_card_count >= 2)
@@ -683,6 +687,7 @@ loyalty_cc_match_obs <- cc_data_cleaned %>%
 ```
 
 Given the assumption that the other multiple matches are due to coincidence, we will drop those other matches.
+
 ```{r}
 loyalty_cc_match_cleaned<-loyalty_cc_match[!(loyalty_cc_match$last4ccnum == "4795" & loyalty_cc_match$loyaltynum == "L2070" | loyalty_cc_match$last4ccnum == "5921" & loyalty_cc_match$loyaltynum == "L9406" | loyalty_cc_match$last4ccnum == "7889" & loyalty_cc_match$loyaltynum == "L2247" | loyalty_cc_match$last4ccnum == "4948" & loyalty_cc_match$loyaltynum == "L3295" | loyalty_cc_match$last4ccnum == "5368" & loyalty_cc_match$loyaltynum == "L6119" | loyalty_cc_match$last4ccnum == "8332" & loyalty_cc_match$loyaltynum == "L8566"),]
 ```
@@ -709,6 +714,7 @@ Uncertainties in data:
 ### Qn4- Given the data sources provided, identify potential informal or unofficial relationships among GASTech personnel. Provide evidence for these relationships. 
 
 We will first create a network graph using the following code chunks.
+
 ```{r}
 ##Prepare data
 cc_carid_emp_match <- cc_carid_match %>%
@@ -813,7 +819,8 @@ g <- cc_graph %>%
   geom_node_point(aes(colour = group, size = centrality_betweenness()))
 g + theme_graph()
 ```
-```{r}
+
+
 ##Visualizing community
 g <- cc_graph %>%
   mutate(community = as.factor(group_optimal(weights = weight))) %>%
@@ -822,11 +829,12 @@ g <- cc_graph %>%
   scale_edge_width(range = c(0.1, 5)) +
   geom_node_point(aes(colour = community))
 g + theme_graph()
-```
+
 
 By using the below interactive network graph together with the use of a datatable, we are able to visualize the interactions between parties and locations and use the datatable to filter for the relevant parties and locations to identify whether they were in the same location during the same period.
 
 For example, 
+
 ```{r}
 ##Interactive viz
 visNetwork(cc_nodes, cc_edges, height = "500px", width = "100%") %>%
@@ -845,6 +853,7 @@ visNetwork(cc_nodes, cc_edges, height = "500px", width = "100%") %>%
 cc_data_cleaned_matched <- subset(cc_data_cleaned_matched, select = -c(timestamp, day, price))
 DT::datatable(cc_data_cleaned_matched, extensions='Scroller', filter = "top", fillContainer = T, options = list(scrollX=TRUE, autoWidth=TRUE, scroller=TRUE))
 ```
+
 We have derived the following potential informal relationships between employees.
 
 1) Desafio Golf course- Several of the executives were congregated at the Desafio Golf Course on Sundays. Willem Vasco-Pais (Environmental Safety Advisor), Ingrid Barranco(SVP/CFO) and Ada Camp-Corrente (SVP/CIO) were present on 12/1/2014 at 1300-1400 and 19/1/2014 at 1200-1500. Sten Sanjorge Jr (President/CEO) and Orhan Strum (SVP/COO) joining during the second session.
@@ -872,7 +881,157 @@ We have derived the following potential informal relationships between employees
 
 11) There are other employees with the same last names such as Minke Mies and Henk Mies, Valeria Morlun and Adan Morlun, Claudio Hawelon and Benito Hawelon. However as some of them belong to the facilities truck drivers team, where due to the data limitations, we are unable to match each the CarID to Employee Name, we are unable to identify the routes of these truck drivers to determine if they were in the same location with the employees with similar last names.
 
+### Qn5- Do you see evidence of suspicious activity? Identify 1- 10 locations where you believe the suspicious activity is occurring, and why.
 
+We have identified the following suspicious activities:
 
+1) Nils Calixto (IT Helpdesk) returned back to Gastech during late hours frequently. This is highly suspicious as the nature of his role does not seem to require returning to office during late nights when there are few employees at work. 
 
+From the facet graph below, we observe that he has returned to office during the period 2100-2400 on 08/01/2014, 15/01/2014 and 17/01/2014.
 
+Filtering the datatable below, we also observe that Nils Calixto has spent $10000 at Frydos Autosupply n' More. This expenditure has been identified as an outlier during our exploratory analysis performed earlier. This further raises suspicions due to the large transaction amount.
+
+```{r}
+##Facet map- by day
+gps_path_selected <- gps_path_cleaned %>%
+  filter(id == 1, timegroup == "21-24")
+  
+tmap_mode("view")
+tm_shape(bgmap) +
+  tm_rgb(bgmap, r = 1, g = 2, b = 3, alpha = NA, saturation = 1, interpolate = TRUE, max.value = 255) +
+  tm_shape(gps_path_selected) +
+  tm_lines(col = "red") +
+  tm_facets(by = "day", ncol = 3)
+```
+
+```{r}
+DT::datatable(cc_data_cleaned_matched, extensions='Scroller', filter = "top", fillContainer = T, options = list(scrollX=TRUE, autoWidth=TRUE, scroller=TRUE))
+```
+
+2) There seems to have been a gathering by certain employees on 10/1/2014 at till late. Employees only started leaving at around 2300. We filter for the day and hour and plotted a facet map. By tracing the employees route with the interactive facet map below, we noted that except for Isia Vann (Perimeter Control)(CarID 16), the other employees seem to leave the house in Carnero Street at around 2300 to return to their respective homes. We have excluded Isia Vann as the route is different from the others. We also noted that two other employees left the gathering later than the others- Felix Balas and Marin Onda. 
+
+The employees who attended the gathering seem to be mainly from the Engineering and Information Technology department:
+    - Nils Calixto (IT Helpdesk)- CarID 1
+    - Isak Baza (IT Technician)- CarID 5
+    - Lucas Alcazar (IT Technician)- CarID 8
+    - Gustav Cazar (Drill Technician)- CarID 9
+    - Axel Calzas (Hydraulic Technician)- CarID 11
+    - Lidelse Dedos (Engineering Group Manager)- CarID 14
+    - Vira Frente (Hydraulic Technician)- CarID 19
+    - Kanon Herrero (Geologist)- CarID 25
+    - Brand Tempestad (Drill Technician)- CarID 33
+    - Felix Balas (Engineer)- CarID 3 (left later at 11/1/2014 0000)
+    - Marin Onda (Drill Site Manager)- CarID 26 (left later at 11/1/2014 0000)
+    
+```{r}
+##Facet map- by id
+gps_path_selected <- gps_path_cleaned %>%
+  filter(day == 10, hour == 23)
+  
+tmap_mode("view")
+tm_shape(bgmap) +
+  tm_rgb(bgmap, r = 1, g = 2, b = 3, alpha = NA, saturation = 1, interpolate = TRUE, max.value = 255) +
+  tm_shape(gps_path_selected) +
+  tm_lines(col = "red") +
+  tm_facets(by = "id", ncol = 3)
+```
+
+```{r}
+##Facet map- by id
+gps_path_selected <- gps_path_cleaned %>%
+  filter(day == 11, hour == 00)
+  
+tmap_mode("view")
+tm_shape(bgmap) +
+  tm_rgb(bgmap, r = 1, g = 2, b = 3, alpha = NA, saturation = 1, interpolate = TRUE, max.value = 255) +
+  tm_shape(gps_path_selected) +
+  tm_lines(col = "red") +
+  tm_facets(by = "id", ncol = 3)
+```
+
+3) Isia Vann (Perimeter Control)(CarID 16) visited a house in Barwyn Street late on 10/1/2014 at 2300 and only left on 11/1/2014 at 0300. This seems to be a one-time occurrence throughout the two weeks.
+
+```{r}
+##Interactive map
+gps_path_selected <- gps_path_cleaned %>%
+  filter(id == 16, day == 10, hour == 23)
+  
+tmap_mode("view")
+tm_shape(bgmap) +
+  tm_rgb(bgmap, r = 1, g = 2, b = 3, alpha = NA, saturation = 1, interpolate = TRUE, max.value = 255) +
+  tm_shape(gps_path_selected) +
+  tm_lines(col= "red")
+```
+
+4) Meeting at Spetson Park at night between Loreto Bodrogi and Isia Vann 
+    - Loreto Bodrogi (Site Control, CarID 15) visited an area near Spetson Park on 07/01/2014 at 0335, departing from his house at 0320. He only departed the area at 0729 and made a purchase at Brewed Awakenings before heading directly to Gastech. 
+    - Isia Vann (Perimeter Control, CarID 16) also had a similar trajectory as Loreto Bodrogi. She left her house at 2301 on 06/01/2014 and arrived at the area near Spetson Park at 2309. She then remained in the same area and left only at 0730 and drove directly to Gastech without making any other stops. 
+    - Both Loreto and Isia's paths would have crossed on their trip to the area near Spetson Park on 07/01/2014. They also left around the same time. They both took the same route to Gastech although Loreto Bodrogi made a transaction at Brewed Awakenings.
+         
+5) Meeting at Taxiarchon Park at night between Loreto Bodrogi and Mies Minke 
+    - Loreto Bodrogi (Site Control, CarID 15) also visited Taxichorn Park on 09/01/2014 at 0332, departing from his house at 0320. He only departed the area at 0723 and stopped by Jack's Magical Beans before heading directly to Gastech.
+    - Minke Mies (Perimeter Control, CarID 24) also visited Taxichorn Park on 09/01/2014, departing from his house at 2300 and arriving at 2306. He only departed the area at 0330 and headed directly home, reaching at 0340.
+    - Minke Mies left Taxichorn Park just as Loreto Bodrogi arrived. This is highly suspicious as they seem to be taking shifts for some kind of stakeout.
+    
+6) On 11/01/2014, Bertrand Ovan visited a sequence of places, without making any transactions. He left his house at 22:11, arriving at Brew've Been Served Cafe at 2212. After staying for 9 minutes, he went to the Ouzeri Elian, arriving at 2227. He then left at 2234 and headed for the place near Kronos Mart and arrived at 22:40. 15 minutes later, he went to the Alberts Fine Clothing arriving at 2258 and stayed there for another 23 minutes. He drove to an area near U-Pump or Jack Magic Beans, starting from 23:21 and arrived at the at 23:25. He stayed there for about 30 minutes, and arrived home at exactly 2359. This is quite unusual as he visited several locations without making any transactions. 
+
+7) Visiting a similar location late at night
+    -Isia Vann (Perimeter Control, CarID 16) left her house at 2300 on 10/1/2014 and arrived at the house near Ahaggo Museum at 2320. She then left only at 0323 on 11/1/2014 and drove home, arriving home at 0334.
+    - Minke Mies (Perimeter Control, CarID 24) also visited house near Ahaggo Musuem on 14/01/2014, departing from his house at 0320 and arriving at 0331. He only departed the area at 0747 and headed directly to Gastech. This seems to be the same area that Isia Vann visited on 10/1/2014.
+    - Hennies Osvaldo (Perimeter Control) also visited house near Ahaggo Musuem on 11/01/2014, departing from his house at 0320 and arriving at 0332. He only departed the area at 1102 on 11/01/2014 and headed to an area near Port of Abila, reaching at 1111. Hennies Osvaldo also made a similar trip on 13/1/2014, departing from his house at 2300 and arriving at 2308, leaving at 0330 on 14/1/2014 and arriving home at 0343 on 14/1/2014.
+    - Both Minke Mies and Hennies Osvaldo may have crossed paths on 14/1/2014 as they seem to only miss each other by a minute.
+    - Both Isia Vann  and Hennies Osvaldo may have crossed paths on 11/1/2014 as they seem to only miss each other by a short period of time.
+
+8) Hennie Osvaldo's residences
+
+Hennies Osavado seems to own two residences- 1) Area next to Guy's Gyros, 2) Area near Frydo's Autosupply N'More. He typically returns to the second house on weekdays and the first house on weekends, with the exception of 08/01/2014.
+
+```{r}
+##Facet map- by day
+gps_path_selected <- gps_path_cleaned %>%
+  filter(id == 21, timegroup == "21-24")
+  
+tmap_mode("view")
+tm_shape(bgmap) +
+  tm_rgb(bgmap, r = 1, g = 2, b = 3, alpha = NA, saturation = 1, interpolate = TRUE, max.value = 255) +
+  tm_shape(gps_path_selected) +
+  tm_lines(col = "red") +
+  tm_facets(by = "day", ncol = 3)
+```
+
+9) Potential relationship between Elsa Orilla and Brand Tempestad
+
+As discussed above, we also noted that Elsa Orilla (Drill Technician) and Brand Tempestad (Drill Technician)
+frequently visired Chostus Hotel on weekdays during lunch hour, up to four times over the two weeks observed. On further investigation, there are two employees with last name Orilla. We do not have further information on whether there is a relationship between them. However if they are partners, this may present as an illicit relationship given that it occurs frequently during lunch hours on weekdays when Kare Orilla is having lunch elsewhere. We also noticed that both parties tend to stagger their departure time from the location for about 10 minutes.
+
+```{r}
+##Facet map- by id
+gps_path_selected <- gps_path_cleaned %>%
+  filter(id == 7, timegroup == "8-12")
+  
+tmap_mode("view")
+tm_shape(bgmap) +
+  tm_rgb(bgmap, r = 1, g = 2, b = 3, alpha = NA, saturation = 1, interpolate = TRUE, max.value = 255) +
+  tm_shape(gps_path_selected) +
+  tm_lines(col = "red") +
+  tm_facets(by = "day", ncol = 3)
+```
+
+```{r}
+##Facet map- by id
+gps_path_selected <- gps_path_cleaned %>%
+  filter(id == 7, timegroup == "13-16")
+  
+tmap_mode("view")
+tm_shape(bgmap) +
+  tm_rgb(bgmap, r = 1, g = 2, b = 3, alpha = NA, saturation = 1, interpolate = TRUE, max.value = 255) +
+  tm_shape(gps_path_selected) +
+  tm_lines(col = "red") +
+  tm_facets(by = "day", ncol = 3)
+```
+
+10) Hennie Osvaldo, Minke Mies, Inga Ferro and Loreto Bodrogi usually take turns visiting a selected few locations during the lunch break (except for 6/1/2014, 12/1/2014 and 19/1/2014). These locations include 1) Area near Frank's Fuels, 2) Area west of Bean There Done That, 3) Area south of Hallowed Grounds, 4) Area south of Katerina's Cafe and 5) Area south-west of the Arkadious Park. These locations are not near most of the usual dining locations and some tend to be quite out of the way. Hence this has been raised as suspicious behavior.
+
+```{r}
+DT::datatable(cc_data_cleaned_matched, extensions='Scroller', filter = "top", fillContainer = T, options = list(scrollX=TRUE, autoWidth=TRUE, scroller=TRUE))
+```

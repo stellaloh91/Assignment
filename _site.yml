@@ -11,8 +11,6 @@ navbar:
       href: eda.html
     - text: "Methodology"
       href: methodology.html
-    - text: "Methodology & Insights"
-      href: methodology_insights.html
     - text: "Insights"
       href: insights.html
     - text: "Conclusion"
