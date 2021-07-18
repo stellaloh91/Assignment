@@ -2,17 +2,23 @@
 title: "Data Exploration"
 description: |
   Visual exploration of data provided
-output: distill::distill_article
+output: 
+  distill::distill_article:
+    toc: true
+    toc_float: true
+    toc_depth: 3
+    self_contained: false
 ---
 <style>
 
 body{
   background-color: #EBEDEF;
   font-family:helvetica;
+  font-size: 20pt
 }
 </style>
 
-```{r setup, include=FALSE}
+```{r setup, include=FALSE, layout="l-body-outset"}
 knitr::opts_chunk$set(fig.retina = 3,
                       echo = FALSE,
                       eval = TRUE,
@@ -43,12 +49,12 @@ for (p in packages){
 The data provided consists of four CSV files, a tourist map and geospatial data files- read_csv() is used to import each CSV file into R. 
 
 Data source       | Data
----------------------------------------------------------------------------------------------------
-cc_data           | Timestamp and transaction amount of credit cards at each location
-loyalty_data      | Timestamp and transaction amount of loyalty cards at each location
-car-assignments   | Name, employment type and employment title of each employee assigned to a carID
-gps               | Latitude and longitude of each carID for each timestamp
-geospatial data   | Geospatial data files, including shapefiles
+----------------------------------------------------------------------------------------------------|
+cc_data           | Timestamp and transaction amount of credit cards at each location               |
+loyalty_data      | Timestamp and transaction amount of loyalty cards at each location              |
+car-assignments   | Name, employment type and employment title of each employee assigned to a carID |
+gps               | Latitude and longitude of each carID for each timestamp                         |
+geospatial data   | Geospatial data files, including shapefiles                                     |
 
 We note that there are some issues with the imported data:
     - Timestamp data is presented in character instead of datetime format
@@ -130,15 +136,15 @@ location_carid_join <- gps_data %>%
 
 The dataset is now ready for data exploration.
 
-### Explore the data
+## Explore the data
 
 We will first perform exploratory data analysis, employing visualization to aid in the exploration of the following areas:
     - Missing values
     - Distribution
     - Outliers
 
-#### Missing values
-```{r}
+### Missing values
+```{r, layout="l-body-outset", fig.width=5.5, fig.height=5}
 ##loyalty card
 missing.values_loyalty <- loyalty_data_cleaned %>%
   gather(key = "key", value = "val") %>%
@@ -167,7 +173,7 @@ percentage.plot_loyalty <- missing.values_loyalty %>%
 ggplotly(percentage.plot_loyalty, tooltip = c("text"))
 ```
 
-```{r}
+```{r, layout="l-body-outset", fig.width=5.5, fig.height=5}
 ##credit card
 missing.values_cc <- cc_data_cleaned %>%
   gather(key = "key", value = "val") %>%
@@ -196,7 +202,7 @@ percentage.plot_cc <- missing.values_cc %>%
 ggplotly(percentage.plot_cc, tooltip = c("text"))
 ```
 
-```{r}
+```{r, layout="l-body-outset", fig.width=5.5, fig.height=5}
 ##location data
 missing.values_gps_carid <- location_carid_join %>%
   gather(key = "key", value = "val") %>%
@@ -227,7 +233,7 @@ However, there appears to be missing values in the location data provided.
 
 From the above plot, LastName, FirstName, CurrentEmploymentType and CurrentEmploymentTitle have the highest percentage of missing values, followed other variables in the combined GPS and car assignment data dataset. As the missing values would not pose a problem later in the analysis, we will not be performing imputation at this stage.
 
-#### Distribution
+### Distribution
 
 The distributions are examined from the density curves of the variables using ggplot().
 
@@ -289,7 +295,7 @@ The distributions of the log-transformed variables now approximates to the norma
 
 We have also plotted the total spent per day in each store for both loyalty and credit card data. As seen in the figures below, the spending differs greatly between stores (note free scales). However, total spending per day from credit card and loyalty card data follows the same trending.
 
-```{r}
+```{r, layout="l-screen-inset shaded", fig.height=10}
 ##loyalty card
 summ_loyalty_data <- loyalty_data_cleaned %>%
   group_by(location, date) %>%
@@ -298,8 +304,9 @@ summ_loyalty_data <- loyalty_data_cleaned %>%
 check_distribution_loyalty_location <- summ_loyalty_data %>%
   ggplot() +
   geom_line(aes(x=date, y = total_spent, group = 1)) +
-  facet_wrap(~location, nrow = 11, ncol = 4, scales = "free") +
+  facet_wrap(~location, nrow = 11, ncol = 4, scales='free_y') +
   ggtitle("Loyalty card spending per store") +
+  scale_x_datetime(date_labels = "%b %d",date_breaks = "2 days") +
   theme_minimal() +
   theme(panel.border = element_rect(colour="grey60", fill = NA),
         strip.background = element_rect(fill = "grey80"),panel.spacing = unit(2, "lines"))
@@ -307,7 +314,7 @@ check_distribution_loyalty_location <- summ_loyalty_data %>%
 ggplotly(check_distribution_loyalty_location)
 ```
 
-```{r}
+```{r, layout="l-screen-inset shaded", fig.height=10}
 ##credit card
 summ_cc_data <- cc_data_cleaned %>%
   group_by(location, date) %>%
@@ -316,8 +323,9 @@ summ_cc_data <- cc_data_cleaned %>%
 check_distribution_cc_location <- summ_cc_data %>%
   ggplot() +
   geom_line(aes(x=date, y = total_spent, group = 1)) +
-  facet_wrap(~location, nrow = 11, ncol = 4, scales = "free") +
+  facet_wrap(~location, nrow = 11, ncol = 4, scales='free_y') +
   ggtitle("Credit card card spending per store") +
+  scale_x_date(date_labels = "%b %d",date_breaks = "2 days") +
   theme_minimal() +
   theme(panel.border = element_rect(colour="grey60", fill = NA),
         strip.background = element_rect(fill = "grey80"),panel.spacing = unit(2, "lines"))
@@ -325,11 +333,11 @@ check_distribution_cc_location <- summ_cc_data %>%
 ggplotly(check_distribution_cc_location)
 ```
 
-#### Outliers
+### Outliers
 
 The outliers are also examined using ggplot().
 
-```{r}
+```{r, layout="l-body-outset", fig.width=5.5, fig.height=5}
 ##loyalty card
 d <- highlight_key(loyalty_data_cleaned)
 m <- list(l=50, r=50, b=150, t=0, pad=2)
@@ -344,7 +352,7 @@ crosstalk::bscols(gg,DT::datatable(d) %>%
                     formatDate(1, method = 'toLocaleDateString'), widths = 15)
 ```
 
-```{r}
+```{r, layout="l-body-outset", fig.width=5.5, fig.height=5}
 ##credit card
 cc_data_cleaned$timestamp <- as.character(cc_data_cleaned$timestamp)
 
