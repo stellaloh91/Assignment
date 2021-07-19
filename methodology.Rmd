@@ -18,11 +18,12 @@ body{
 </style>
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(fig.retina = 3,
+knitr::opts_chunk$set(fig.retina = 2,
                       echo = TRUE,
                       eval = TRUE,
                       message = FALSE,
-                      warning = FALSE)
+                      warning = FALSE,
+                      tidy.opts=list(width.cutoff=80),tidy=TRUE)
 ```
 
 ## Methodology and Design
@@ -36,60 +37,64 @@ In this section, we will explore the methodology to analyze the data and analyze
 ### Methodology
 
 #### Exploratory Visualization
-As observed above, popular day of week differs for some of the locations such as Katerina's Cafe. This is unexpected as we would expect the trends to be similar for both cards.
 
-Also, based on the timestamp of credit card transactions, we noted that all of the transactions in "Bean There Done That", "Brewed Awakenings", "Coffee Shack" and "Jack's Magical Beans" during the period of transactions- 12:00pm. It is highly unlikely that all transactions in these locations are transacted at the same time. Hence, the timestamp for these transactions may be incorrect.
+1) As there are no common identifiers between the loyalty card and credit card dataset, we will proceed to analyze them separately.
 
-Given that these timestamps may not be representative of the actual transaction time, we will not be using this information for further analysis subsequently.
+2) To identify the most popular locations and when they are popular, we will analyze the transaction volume based on:
+    - day (across the 2 weeks)
+    - day of week
+
+3) Time information is provided for credit card transactions but not loyalty card transactions. Nonetheless, we will extract the date from datetime information provided in credit card dataset so that we can analyze both datasets across the common dates.
+
+```{r}
+glimpse(loyalty_data)
+```
+
+```{r}
+glimpse(cc_data)
+```
 
 #### GeoVisual Analysis
 
-Assuming that the car assignment list provided includes all employees, we noted that there are 44 distinct employees. However, we noted that there are 55 distinct credit card numbers and 54 distinct loyalty card numbers. This is unusual as each employee should have been issued a loyalty card and hence we would expect number of distinct credit cards, loyalty cards and employee count to match.
+1) **Georeferencing**
 
-More investigation should be made into this discrepancy. One explanation could be that employees could have used more than one credit card with their loyalty card. Another explanation could be that there is a new employee who has not received the loyalty card. Given that the employee count is different from number of distinct loyalty cards, we should check with Gastech if there are any employees missing from this list.
+Given that we are provided with the tourist map and SHP file of Abila, we are able to perform georeferencing. We will perform georeferencing in QGIS.
 
-After mapping the GPS trajectories, We also noted that there were no GPS data indicating that any car stopped near "Bean There Done That", "Brewed Awakenings", "Coffee Shack" and "Jack's Magical Beans" during the period of transactions- 12:00pm. Hence, these transactions are either incorrectly timed or may even be fraudulent.
+2) **Drawing the paths** 
 
+We are provided with longitude and latitude of each car across the 2 weeks, allowing us to plot their trajectories and hence locate each car and its driver at a certain point of a day. 
 
+3) **Understand the paths**
 
-### Design
+After plotting the trajectory of each car on the tourist map in step 2, we are able to visualize where each driver was at at each time of the day. As the data provided does not match the credit and loyalty card to its owner, we can use the GPS trajectories to match against the credit card information based on location and timestamp to match the driver to the card.
+
+4) **Interpretations on "patterns of life" analysis**
+
+For the daily patterns, we look at the activities of different vehicles at different hours of the day – what time they go to the office, what time they leave and where do they go at different hours. For the visualization design, an interactive map is used to allow the users to utilize the tooltip function to get information on time, to be used for the analysis easily.
+
+#### Network Visualisation and Analysis
+
+1) **Segmenting employees**
+
+The employees were divided into their respective departments. This sets the scene for the interpretation of the connections in the subsequent sessions, as the patterns will be analyzed for each segment respectively with the certain patterns being compared between similar segments.
+
+2) **Drawing the network graph**
+
+Bipartite graphs are used as we are provided with credit card information showing employees transactions with each location. As there is no information on interactions between employees themselves, we will utilize a bipartite graph where two sets of vertices which are connected to each other, but not within themselves.
+
+3) **Interpreting the connections**
+
+Due to the limitations in RMarkdown, crosstalk is not available for the VisNetwork package used to visualize networks. The network graph shows connections between an employee and the location he/she visits based on the credit card transaction data provided. However, it does not reflect when these visits occur and if various employees may have crossed paths due to transactions at the same location during the same time period. Hence we will utilize both the interactive network graph and an interactive datatable to get further details on these transactions such as the time they occurred to assess if the employees may have crossed paths.
+
+#### Overall visualization design concepts
+
+The visualizations were designed make full use of RStudio's interactive plots such that we can provide a tool for the users to customize their analysis as much as possible. The users are able to filter the different input parameters (such as location for exploratory visualization and by department for network graph) and utilize the maps tooltips function and interactive datatables to obtain greater detail on the visualizations. This will be explained in greater details in the plot design section.
+
+### Plot Design
 
 #### Exploratory Visualization
 
 1) **Transaction volume overview by day**- We have decided to employ the use of a linked bar chart to reflect the volume of transactions across the 2 weeks for each location. Users can then select the location they want specific details on and the linked line chart will then provide the details on transaction volume across time.
-
-```{r, layout="l-body-outset", fig.width=5.5, fig.height=5}
-##Volume from loyalty card dataset- not linked
-loyalty_data_loc_vol <- loyalty_data_cleaned %>%
-  group_by(location) %>%
-  summarise(txn_count = n()) %>%
-  arrange(desc(txn_count))
-
-loyalty_loc_vol_bar <- plot_ly(loyalty_data_loc_vol, x = ~txn_count, y = ~location, type = "bar", hoverinfo = "text", 
-                       text = ~paste("Transaction Volume:", loyalty_data_loc_vol$txn_count)) %>% 
-                      layout(title = "Loyalty card transaction Volume by Location", 
-                             xaxis = list(title = "Transaction Volume", zeroline = FALSE), 
-                             yaxis = list(title = "Location", zeroline = FALSE, categoryorder = "array", dtick= 1, categoryarray = ~txn_count))
-
-loyalty_loc_vol_bar
-
-library(crosstalk)
-
-loyalty_data_count <- loyalty_data_cleaned %>%
-  group_by(location, date) %>%
-  summarise(txn_count = n()) %>%
-  arrange(desc(txn_count))
-
-loyalty_data_count %>% 
-  SharedData$new(key = ~location) %>%
-  plot_ly(x = ~date, y = ~txn_count, hoverinfo = "text", 
-              text = ~paste("Location:", location,"<br>",
-                            "Date:", date,"<br>",
-                            "Transaction Count:", txn_count), alpha = 0.5) %>%
-          group_by(location) %>%
-          add_lines()
-```
-
 
 ```{r, layout="l-body-outset", fig.width=5.5, fig.height=5}
 ##Volume from loyalty card dataset by date- linked
@@ -126,16 +131,31 @@ bscols(widths = c(14,14), loyalty_loc_vol_bar, loyalty_loc_vol_line)
 ```{r, layout="l-body-outset", fig.width=5.5, fig.height=5}
 ##Volume from credit card dataset by date- linked
 
-cc_data_loc_vol <- cc_data_cleaned %>%
+shared_data_cc <- SharedData$new(cc_data_cleaned, key = ~location)
+
+cc_data_loc_vol_bar <- shared_data_cc %>%
+  plot_ly() %>% 
   group_by(location) %>%
   summarise(txn_count = n()) %>%
-  arrange(desc(txn_count))
+  arrange(desc(txn_count)) %>%
+  add_bars(x = ~txn_count, y = ~location, type = "bar", hoverinfo = "text", 
+          text = ~paste("Location:", location,
+                        "<br>Transaction Volume:", txn_count)) %>%
+  layout(title = "Credit card transaction Volume by Location", xaxis = list(title = "Transaction Volume", 
+         zeroline = FALSE), yaxis = list(title = "Location", zeroline = FALSE, categoryorder = "array", dtick= 1, categoryarray = ~txn_count))
 
-cc_loc_vol_bar <- plot_ly(cc_data_loc_vol, x = ~txn_count, y = ~location, type = "bar", hoverinfo = "text", 
-                       text = ~paste("Transaction Volume:", cc_data_loc_vol$txn_count)) %>% 
-                      layout(title = "Credit card transaction Volume by Location", xaxis = list(title = "Transaction Volume", zeroline = FALSE), yaxis = list(title = "Location", zeroline = FALSE, dtick= 1, categoryorder = "array", categoryarray = ~txn_count))
+cc_loc_vol_line <- shared_data_cc %>% 
+  plot_ly() %>%
+  group_by(location, date) %>%
+  summarise(txn_count = n()) %>%
+  add_lines(x = ~date, y = ~txn_count, hoverinfo = "text", 
+          text = ~paste("Location:", location,
+                        "<br>Date:", date,
+                        "<br>Transaction Volume:", txn_count)) %>%
+  layout(xaxis = list(title = "Date", showgrid = TRUE, showticklabels = TRUE), 
+         yaxis = list(title = "Transaction volume"))
 
-cc_loc_vol_bar
+bscols(widths = c(14,14), cc_data_loc_vol_bar, cc_loc_vol_line)
 ```
 
 2) **Overview of transaction volume difference**- provide an overview of the difference in transaction volume across each location per day.
@@ -274,9 +294,9 @@ cc_timegroup_vol <-shared_data %>%
 bscols(widths = c(10,4),
   list(
     filter_select("location", "Please Specify the location", shared_data, group =  ~location, multiple = F),
-    datatable(shared_data) %>% formatDate(1, method = 'toLocaleDateString'),
   cc_wkday_vol,
-  cc_timegroup_vol
+  cc_timegroup_vol, 
+  datatable(shared_data) %>% formatDate(1, method = 'toLocaleDateString')
 ))
 ```
 
@@ -335,8 +355,7 @@ visNetwork(cc_nodes, cc_edges, height = "800px", width = "100%") %>%
 ```
 
 ```{r, fig.height=6}
-cc_data_cleaned_matched <- subset(cc_data_cleaned_matched, select = -c(timestamp, day, price))
-DT::datatable(cc_data_cleaned_matched, fillContainer = T, extensions='Scroller', filter = "top", options = list(scrollX=TRUE, autoWidth=TRUE, scroller=TRUE, scrollY = '450px'))
+
 ```
 
 ```{r, layout="l-body-outset", fig.width=12, fig.height=10}

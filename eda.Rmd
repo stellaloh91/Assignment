@@ -20,7 +20,7 @@ body{
 
 ```{r setup, include=FALSE, layout="l-body-outset"}
 knitr::opts_chunk$set(fig.retina = 3,
-                      echo = FALSE,
+                      echo = TRUE,
                       eval = TRUE,
                       message = FALSE,
                       warning = FALSE)
@@ -124,16 +124,16 @@ gps_data
 assignment_data$CarID <- as_factor(assignment_data$CarID)
 assignment_data
 ```
-
 After cleaning the individual data frames, we can now proceed to combine the GPS and car assignment data in a single data frame.
 
 ```{r}
 # Join gps and assignment data using full join
 location_carid_join <- gps_data %>%
   full_join(assignment_data, by = c("id" = "CarID")) %>% 
-  mutate(date = as_date(Timestamp), day = as_weekday(Timestamp), hour = get_hour(Timestamp)) 
-```
+  mutate(date = as_date(Timestamp), day = weekdays(Timestamp), hour = get_hour(Timestamp)) 
 
+DT::datatable(location_carid_join, fillContainer = T, extensions='Scroller', filter = "top", options = list(scrollX=TRUE, autoWidth=TRUE, scroller=TRUE, scrollY = '450px'))
+```
 The dataset is now ready for data exploration.
 
 ## Explore the data
@@ -231,7 +231,13 @@ ggplotly(percentage.plot_gps_carid, tooltip = c("text"))
 From the above plots, we note that there is no missing values in both the loyalty and credit card data.
 However, there appears to be missing values in the location data provided. 
 
-From the above plot, LastName, FirstName, CurrentEmploymentType and CurrentEmploymentTitle have the highest percentage of missing values, followed other variables in the combined GPS and car assignment data dataset. As the missing values would not pose a problem later in the analysis, we will not be performing imputation at this stage.
+From the above plot, LastName, FirstName, CurrentEmploymentType and CurrentEmploymentTitle have the highest percentage of missing values, followed other variables in the combined GPS and car assignment data dataset. On further investigation, we note that this is because 
+
+```{r}
+DT::datatable(location_carid_join, fillContainer = T, extensions='Scroller', filter = "top", options = list(scrollX=TRUE, autoWidth=TRUE, scroller=TRUE, scrollY = '450px'))
+```
+
+As the missing values would not pose a problem later in the analysis, we will not be performing imputation at this stage.
 
 ### Distribution
 
@@ -246,6 +252,8 @@ check_distribution_loyalty <- loyalty_data_cleaned %>%
   theme_minimal() +
   theme(panel.border = element_rect(colour="grey60", fill = NA),
         strip.background = element_rect(fill = "grey80"))
+
+ggplotly(check_distribution_loyalty)
 ```
 
 ```{r}
@@ -258,7 +266,6 @@ check_distribution_cc <- cc_data_cleaned %>%
   theme(panel.border = element_rect(colour="grey60", fill = NA),
         strip.background = element_rect(fill = "grey80"))
 
-ggplotly(check_distribution_loyalty)
 ggplotly(check_distribution_cc)
 ```
 
@@ -272,8 +279,10 @@ check_distribution_loyalty_log <- loyalty_data %>%
   theme_minimal() +
   theme(panel.border = element_rect(colour="grey60", fill = NA),
         strip.background = element_rect(fill = "grey80")) + 
-  scale_x_log10() +
+  scale_x_log10(limits = c(1,1e3)) +
   labs(title = "Distribution of loyalty card spending after log transformation", x = 'price (log scale)', y = "density")
+
+check_distribution_loyalty_log
 ```
 
 ```{r}
@@ -287,7 +296,6 @@ check_distribution_cc_log <- cc_data %>%
   scale_x_log10() +
   labs(title = "Distribution of credit card spending after log transformation", x = 'price (log scale)', y = "density")
 
-ggplotly(check_distribution_loyalty_log)
 ggplotly(check_distribution_cc_log)
 ```
 
@@ -303,7 +311,7 @@ summ_loyalty_data <- loyalty_data_cleaned %>%
 
 check_distribution_loyalty_location <- summ_loyalty_data %>%
   ggplot() +
-  geom_line(aes(x=date, y = total_spent, group = 1)) +
+  geom_bar(aes(x=date, y = total_spent, group = 1)) +
   facet_wrap(~location, nrow = 11, ncol = 4, scales='free_y') +
   ggtitle("Loyalty card spending per store") +
   scale_x_datetime(date_labels = "%b %d",date_breaks = "2 days") +
@@ -367,4 +375,4 @@ gg <- highlight(ggplotly(boxplot_cc_plot), "plotly_selected")
 crosstalk::bscols(gg,DT::datatable(d1), widths = 15)
 ```
 
-Using the interactive plots above, we are able to select the outliers and this filters the linked datatable for the relevant transaction, giving additional insight such as the card number. For example, we observe a $10,000 transaction by card ending with 9551 at Frydos Autosupply n'More but not a corresponding transaction on the loyalty card.
+Using the interactive plots above, we are able to select the outliers and this filters the linked datatable for the relevant transaction, giving additional insight such as the card number. From the credit card spending boxplot above, we note that there seems to be outliers, the most notable being in Frydos Autosupply n'More where there was a transaction for $10,000 on 01/13/2014 by card ending with 9551. More notably, there was no corresponding transaction on the loyalty card.

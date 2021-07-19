@@ -22,70 +22,36 @@ knitr::opts_chunk$set(fig.retina = 3,
                       echo = TRUE,
                       eval = TRUE,
                       message = FALSE,
-                      warning = FALSE)
+                      warning = FALSE,
+                      tidy.opts=list(width.cutoff=80),tidy=TRUE)
 ```
 
-## Response to VAST Challenge quesions
+## Viz and Insights
 
 In this section, we will employ appropriate visually driven data analysis techniques to answer the questions in the challenge.
 
-### Qn 1- Using just the credit and loyalty card data, identify the most popular locations, and when they are popular. What anomalies do you see? What corrections would you recommend to correct these anomalies?
+**Qn 1- Using just the credit and loyalty card data, identify the most popular locations, and when they are popular. What anomalies do you see? What corrections would you recommend to correct these anomalies?**
 
-Based on the interactive charts below, the top 3 most popular locations by transaction volume are listed below:
+### Location popularity
 
-*Loyalty card spending*
+Transaction volume for each location is analyzed using the loyalty and credit card transaction information provided. We also parsed the date information from timestamp in credit card data so as to align the comparison with loyalty data, where only date information is provided.
 
-Ranking   | Location            | Popular Date      
-------------------------------------------------
-1         | Katerina's Cafe     | 01/11/2014  
-2         | Hippokampos         | 01//2014   
-3         | Guy's Gyros         | 01//2014   
+Based on the interactive charts, we noted that the top 3 most popular locations by transaction volumes are: 
 
-*Credit card spending*
+*Loyalty card transaction volume*
 
-Ranking   | Location            | Date        
------------------------------------------------
-1         | Katerina's Cafe     | 01/11/2014  
-2         | Hippokampos         | 01//2014    
-3         | Guy's Gyros         | 01//2014     
+1) Katerina's Cafe- Most popular on 01/11/2014 with 19 transactions, followed by 01/16/2014 (18) and 01/14/2014 (17).
+2) Hippokampos- Most popular on 01/08/2014  with 14 transactions, followed by 01/06/2014, 01/12/2014, 01/13/2014, 01/16/2014 and 01/17/2014 tied in second position with 13 transactions each day, and 01/15/2014 with 11 transactions.
+3) Guy's Gyros- Most popular on 01/13/2014 with 15 transactions, followed by 01/15/2014 (14) and 01/09/2014 (13), 01/16/2014 (13) and 01/17/2014 (13) being the third most popular days by transaction volume.
 
-```{r, layout="l-body-outset", fig.width=5.5, fig.height=5}
-##Volume from loyalty card dataset- not linked
-loyalty_data_loc_vol <- loyalty_data_cleaned %>%
-  group_by(location) %>%
-  summarise(txn_count = n()) %>%
-  arrange(desc(txn_count))
+*Credit card transaction volume*
 
-loyalty_loc_vol_bar <- plot_ly(loyalty_data_loc_vol, x = ~txn_count, y = ~location, type = "bar", hoverinfo = "text", 
-                       text = ~paste("Transaction Volume:", loyalty_data_loc_vol$txn_count)) %>% 
-                      layout(title = "Loyalty card transaction Volume by Location", 
-                             xaxis = list(title = "Transaction Volume", zeroline = FALSE), 
-                             yaxis = list(title = "Location", zeroline = FALSE, categoryorder = "array", dtick= 1, categoryarray = ~txn_count))
-
-loyalty_loc_vol_bar
-
-library(crosstalk)
-
-loyalty_data_count <- loyalty_data_cleaned %>%
-  group_by(location, date) %>%
-  summarise(txn_count = n()) %>%
-  arrange(desc(txn_count))
-
-loyalty_data_count %>% 
-  SharedData$new(key = ~location) %>%
-  plot_ly(x = ~date, y = ~txn_count, hoverinfo = "text", 
-              text = ~paste("Location:", location,"<br>",
-                            "Date:", date,"<br>",
-                            "Transaction Count:", txn_count), alpha = 0.5) %>%
-          group_by(location) %>%
-          add_lines()
-```
-
+1) Katerina's Cafe- Most popular on 01/18/2014 with 20 transactions, followed by 01/06/2014 (19) and 01/11/2014 (18).
+2) Hippokampos- Most popular on 01/16/2014  with 17 transactions, followed by 01/06/2014 (16), and 01/09/2014 with 14 transactions.
+3) Guy's Gyros- Most popular on 01/09/2014 and 01/13/2014 with 15 transactions, followed by 01/10/2014 and 01/17/2014 with 14 transactions each day, and 01/15/2014 and 01/16/2014 (13) being the third most popular days by transaction volume.
 
 ```{r, layout="l-body-outset", fig.width=5.5, fig.height=5}
 ##Volume from loyalty card dataset by date- linked
-
-library(crosstalk)
 
 shared_data <- SharedData$new(loyalty_data_cleaned, key = ~location)
 
@@ -117,19 +83,39 @@ bscols(widths = c(14,14), loyalty_loc_vol_bar, loyalty_loc_vol_line)
 ```{r, layout="l-body-outset", fig.width=5.5, fig.height=5}
 ##Volume from credit card dataset by date- linked
 
-cc_data_loc_vol <- cc_data_cleaned %>%
+shared_data_cc <- SharedData$new(cc_data_cleaned, key = ~location)
+
+cc_data_loc_vol_bar <- shared_data_cc %>%
+  plot_ly() %>% 
   group_by(location) %>%
   summarise(txn_count = n()) %>%
-  arrange(desc(txn_count))
+  arrange(desc(txn_count)) %>%
+  add_bars(x = ~txn_count, y = ~location, type = "bar", hoverinfo = "text", 
+          text = ~paste("Location:", location,
+                        "<br>Transaction Volume:", txn_count)) %>%
+  layout(title = "Credit card transaction Volume by Location", xaxis = list(title = "Transaction Volume", 
+         zeroline = FALSE), yaxis = list(title = "Location", zeroline = FALSE, categoryorder = "array", dtick= 1, categoryarray = ~txn_count))
 
-cc_loc_vol_bar <- plot_ly(cc_data_loc_vol, x = ~txn_count, y = ~location, type = "bar", hoverinfo = "text", 
-                       text = ~paste("Transaction Volume:", cc_data_loc_vol$txn_count)) %>% 
-                      layout(title = "Credit card transaction Volume by Location", xaxis = list(title = "Transaction Volume", zeroline = FALSE), yaxis = list(title = "Location", zeroline = FALSE, dtick= 1, categoryorder = "array", categoryarray = ~txn_count))
+cc_loc_vol_line <- shared_data_cc %>% 
+  plot_ly() %>%
+  group_by(location, date) %>%
+  summarise(txn_count = n()) %>%
+  add_lines(x = ~date, y = ~txn_count, hoverinfo = "text", 
+          text = ~paste("Location:", location,
+                        "<br>Date:", date,
+                        "<br>Transaction Volume:", txn_count)) %>%
+  layout(xaxis = list(title = "Date", showgrid = TRUE, showticklabels = TRUE), 
+         yaxis = list(title = "Transaction volume"))
 
-cc_loc_vol_bar
+bscols(widths = c(14,14), cc_data_loc_vol_bar, cc_loc_vol_line)
 ```
 
-When comparing both datasets, I also noted that there are differences in the transaction count on the loyalty card and credit card. In particular, there were days where loyalty card transactions were higher than credit card transactions. This is unexpected as loyalty card is used to collect discounts and rewards and cannot be used for payment. Hence one would expect both volumes to either be the same or for credit card volumes (actual purchase) to be higher than loyalty card volumes (in cases where the employee may have forgotten to present loyalty card for rewards/ discounts). The difference in volumes each day across both cards are illustrated below.
+Just by comparing the top 3 locations and their popular days, we noted that there are differences in the transaction count per day for each location on the loyalty card and credit card. In particular, there were days where loyalty card transactions were higher than credit card transactions. This is unexpected as loyalty card is used to collect discounts and rewards and cannot be used for payment. Hence one would expect both volumes to either be the same or for credit card volumes (actual purchase) to be higher than loyalty card volumes (in cases where the employee may have forgotten to present loyalty card for rewards/ discounts). The difference in volumes each day across both cards are illustrated below. The darker the blue hue, the greater the loyalty data transaction volume exceeds credit card transaction volume.
+
+Some of the notable differences observed include:
+1) Kronos Mart- Loyalty card volume exceeded credit card volume by 3 transactions on 01/18/2014
+2) Katerina's Cafe- Credit card volume exceeded loyalty card volume by 5 transactions on 01/18/2014
+3) Brew've Been Served- Credit card volume exceeded loyalty card volume by 4 transactions on 01/09/2014
 
 ```{r, layout="l-body-outset", fig.width=7.5, fig.height=5.5}
 ##Difference in volume by day
@@ -152,7 +138,8 @@ count_loyalty_cc_comb <- loyalty_data_count %>%
 
 a <- list(
   title = "Difference in volume per day by location",
-  showticklabels = TRUE
+  showticklabels = TRUE, 
+  dtick= 1
 )
 
 txn_vol_difference_heatmap <- count_loyalty_cc_comb %>%
@@ -170,13 +157,11 @@ txn_vol_difference_heatmap %>% layout(yaxis = a, xaxis = list(
 
 We will then analyze the transaction volume by day of week to observe volume trends across the week.
 
-* Loyalty card spending*
+*Loyalty card transaction volume*
 
-Ranking   | Location            | Popular Day of Week
---------------------------------------------------
-1         | Katerina's Cafe     | Tue, Thu, Sat
-2         | Hippokampos         | Mon, Wed, Thu
-3         | Guy's Gyros         | Mon, Thu, Fri
+1) Katerina's Cafe- Most popular on Saturdays with 34 transactions, followed by Tuesdays (33) and Thursdays (32).
+2) Hippokampos- Most popular on Mondays with 26 transactions, followed by Wednesdays and Thursdays (25) and Fridays (22).
+3) Guy's Gyros- Most popular on Mondays and Thursdays with 26 transactions, followed by Fridays (25) and Wednesdays (23).
 
 ```{r, layout="l-body-outset", fig.width=8.5, fig.height=8}
 ##Loyalty card volume by day of week
@@ -217,13 +202,11 @@ bscols(widths = c(10,4),
 
 Given that we are provided with credit card timestamp information, we will take one step further to analyze the volume of credit card transactions by location and time.
 
-* Credit card spending*
+*Credit card transaction volume*
 
-Ranking   | Location            | Popular Day of Week   | Popular Time
----------------------------------------------------------------------------------------------------------
-1         | Katerina's Cafe     | Mon, Tue, Sat         | 1700-2000 across weekday and weekends
-2         | Hippokampos         | Mon, Wed, Thu         | Most popular on 1300-1600 on weekdays and 1700-2000 on weekends
-3         | Guy's Gyros         | Mon, Thu, Fri         | 1700-2000 across weekday and weekends except for Friday where 1300-1600 is most popular
+1) Katerina's Cafe- Most popular on Saturdays with 38 transactions, followed by Mondays and Tuesdays (34) and Thursdays (32). Usually popular around dinner time (1700-2000) across all days in the week.
+2) Hippokampos- Most popular on Thursdays with 31 transactions, followed by Mondays (28) and Wednesdays (27). Usually popular around lunch time (1300-1600), except for weekends where it is more popular during dinner hours (1700-2000).
+3) Guy's Gyros- Most popular on Thursdays and Fridays with 28 transactions, followed by Mondays (26) and Tuesdays and Wednesdays (25). Usually popular around dinner time (1700-2000), except for Fridays where it is more popular during lunch hours (1300-1600).
 
 ```{r, layout="l-body-outset", fig.width=8.5, fig.height=8}
 ## Credit card volume by day of week
@@ -289,9 +272,23 @@ bscols(widths = c(10,4),
 
 As observed above, popular day of week differs for some of the locations such as Katerina's Cafe. This is unexpected as we would expect the trends to be similar for both cards.
 
-Also, based on the timestamp of credit card transactions, we noted that all of the transactions in "Bean There Done That", "Brewed Awakenings", "Coffee Shack" and "Jack's Magical Beans" during the period of transactions- 12:00pm. It is highly unlikely that all transactions in these locations are transacted at the same time. Hence, the timestamp for these transactions may be incorrect.
+### Anomalies
 
-Given that these timestamps may not be representative of the actual transaction time, we will not be using this information for further analysis subsequently.
+Other anomalies noted include:
+
+1) Timestamp data in credit card data set was provided in the datetime format while timestamp data in loyalty card data set was in the date format. This made it harder to compare between both datasets. As discussed above, in order to overcome this, I parsed the date information from datetime data provided in the credit card dataset and grouped the credit card data by date so as to align the information with that in the loyalty card dataset for comparability.
+
+```{r}
+glimpse(loyalty_data)
+```
+
+```{r}
+glimpse(cc_data)
+```
+
+2) Based on the timestamp of credit card transactions, we noted that all of the transactions in "Bean There Done That", "Brewed Awakenings", "Coffee Shack" and "Jack's Magical Beans" during the period of transactions- 12:00pm. It is highly unlikely that all transactions in these locations are transacted at the same time. Hence, the timestamp for these transactions may be incorrect.
+
+Given that these timestamps may not be representative of the actual transaction time, we will be mindful of using this information for further analysis subsequently.
 
 ```{r}
 cc_data_incorrect_time <- cc_data_cleaned %>%
@@ -304,11 +301,20 @@ cc_data_incorrect_time = subset(cc_data_incorrect_time, select = -c(timegroup, d
 DT::datatable(cc_data_incorrect_time, options = list(pageLength = 10, width="100%"))
 ```
 
-Furthermore, we also noted that there are several transactions in Kronos Mart at 3am on 13 January and 19 January. This is highly unusual and warrants further investigation.
+3) Furthermore, we also noted that there are several transactions in Kronos Mart at 3am on 13 January and 19 January. This is highly unusual and warrants further investigation. We will be mindful of using this information for further analysis subsequently.
 
-Other anomalies noted from the data are as follows:
+```{r}
+cc_data_kronos <- cc_data_cleaned %>%
+  filter(location == "Kronos Mart")
 
-1) As seen in the datatables below, there are 55 credit cards but only 54 loyalty card spending information provided. This is unusual as all employees are provided with a loyalty card. This discrepancy may arise because the employee does not want his/ her movement to be tracked and hence is avoiding using the loyalty card, or that employees are using more than 1 credit card for their purchases.
+cc_data_kronos$timestamp <- as.character(cc_data_kronos$timestamp)
+
+cc_data_kronos = subset(cc_data_kronos, select = -c(timegroup, day, hour, daynumber, weekday))
+
+DT::datatable(cc_data_kronos, options = list(pageLength = 10, width="100%"))
+```
+
+4) As seen in the datatables below, there are 55 credit cards but only 54 loyalty card spending information provided. This is unusual as all employees are provided with a loyalty card. This discrepancy may arise because the employee does not want his/ her transactions to be tracked and hence is avoiding using the loyalty card, or that employees are using more than 1 credit card for their purchases.
 
 ```{r}
 ##loyalty card
@@ -330,13 +336,7 @@ distinct_cc <- cc_data_cleaned  %>%
 DT::datatable(distinct_cc, options = list( columnDefs = list(list(className = 'dt-center', targets = 0:2, width = '20%')))) 
 ```
 
-2)  Timestamp data in credit card data set was provided in the datetime format while timestamp data in loyalty card data set was in the date format. This made it harder to compare between both datasets, In order to overcome this, I grouped the credit card data by date so as to align the information with that in the loyalty card dataset for comparability.
-
-### GeoVisual Analysis
-
-### Network Visualisation and Analysis
-
-### Qn 2- Add the vehicle data to your analysis of the credit and loyalty card data. How does your assessment of the anomalies in question 1 change based on this new data? What discrepancies between vehicle, credit, and loyalty card data do you find? 
+**Qn 2- Add the vehicle data to your analysis of the credit and loyalty card data. How does your assessment of the anomalies in question 1 change based on this new data? What discrepancies between vehicle, credit, and loyalty card data do you find?**
 
 Assuming that the car assignment list provided includes all employees, we noted that there are 44 distinct employees. However, we noted that there are 55 distinct credit card numbers and 54 distinct loyalty card numbers. This is unusual as each employee should have been issued a loyalty card and hence we would expect number of distinct credit cards, loyalty cards and employee count to match.
 
@@ -394,6 +394,11 @@ missing_empname <- location_carid_join  %>%
 
 DT::datatable(missing_empname, caption = "CarID with no assigned employee", options = list(columnDefs = list(list(className = 'dt-center', targets = 0:3, width = '25%'))))
 ```
+
+
+### GeoVisual Analysis
+
+### Network Visualisation and Analysis
 
 *Working with geospatial data*
 
@@ -481,7 +486,7 @@ Abila_st <- st_read(dsn = "data/Geospatial", layer = "Abila")
 ```{r}
 ##Converting gps data to Simple Feature Data Frame
 gps_data <- gps_data %>%
-  mutate(day = get_day(gps_data$Timestamp), date = as_date(gps_data$Timestamp), minute = get_minute(gps_data$Timestamp), day_of_week = as_weekday(gps_data$Timestamp), hour = get_hour(gps_data$Timestamp)) 
+  mutate(day = get_day(gps_data$Timestamp), date = as_date(gps_data$Timestamp), minute = get_minute(gps_data$Timestamp), day_of_week = weekdays(gps_data$Timestamp), hour = get_hour(gps_data$Timestamp)) 
 
 gps_data$timegroup = cut(gps_data$hour,c(0,4,8,12,16,20,24))
 levels(gps_data$timegroup) = c("0-4","5-8","8-12","13-16","17-20","21-24")
@@ -703,6 +708,7 @@ Uncertainties in method:
     - Assumption that employee will make a transaction when they visit a location. GPS coordinates only infer that the employee was at a certain area but does not mean that he/she has to make any purchases when at that location. Hence matching GPS data to transaction data alone may not be accurate in some instances where employee does not spend/ makes purchases using cash instead of credit card.
     - As the tourist map only provides information about certain tourist attractions and not all the locations in Abila, we are unable to match the full list of transactions from trajectory as seen in the map view to the transactions occurring in locations which are not reflected in tourist map (e.g. Abila Zacharo). Furthermore, as Abila is relatively small, many of the GPS trajectories for different cars overlap. This may result in incorrect matching as it is more of a guesswork as not all points in the trajectory can be mapped to an actual transaction.
     - There are differences in the amount recorded on credit card and loyalty card for certain transactions, hence resulting in N/As in the joined dataset. We have removed the rows with N/As and instead worked with the joined data. However, this is based on the assumption that card transactions with same date, location and price relate to the same transaction. There may be instances of pure coincidence when this is not true, as described above.
+    - Employee may not have used their assigned car or made a purchase using their own loyalty/ credit card.
     
 Uncertainties in data:
     - As mentioned above, there are 44 unique CarID GPS coordinates provided. However, the number of unique credit and debit cards exceed 44. Hence, we are unable to map these other credit and loyalty cards to the CarID.
