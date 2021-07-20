@@ -170,9 +170,6 @@ We will then analyze the transaction volume by day of week to observe volume tre
 loyalty_data_cleaned$daynumber = lubridate::wday(loyalty_data_cleaned$date, week_start = 1)
 loyalty_data_cleaned$weekday = factor(loyalty_data_cleaned$weekday, levels= c("Sunday", "Monday", 
                                              "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"))
-
-
-
 ##Plots
 shared_data_loyalty = SharedData$new(loyalty_data_cleaned, key = ~ location)
 
@@ -338,53 +335,55 @@ DT::datatable(distinct_cc, options = list( columnDefs = list(list(className = 'd
 
 **Qn 2- Add the vehicle data to your analysis of the credit and loyalty card data. How does your assessment of the anomalies in question 1 change based on this new data? What discrepancies between vehicle, credit, and loyalty card data do you find?**
 
-Assuming that the car assignment list provided includes all employees, we noted that there are 44 distinct employees. However, we noted that there are 55 distinct credit card numbers and 54 distinct loyalty card numbers. This is unusual as each employee should have been issued a loyalty card and hence we would expect number of distinct credit cards, loyalty cards and employee count to match.
+### 2.1 Discrepancies
 
-More investigation should be made into this discrepancy. One explanation could be that employees could have used more than one credit card with their loyalty card. Another explanation could be that there is a new employee who has not received the loyalty card. Given that the employee count is different from number of distinct loyalty cards, we should check with Gastech if there are any employees missing from this list.
+1) Assuming that the car assignment list provided includes all employees, we noted that there are 44 distinct employees. However, we noted that there are 55 distinct credit card numbers and 54 distinct loyalty card numbers. This is unusual as each employee should have been issued a loyalty card and hence we would expect number of distinct credit cards, loyalty cards and employee count to match.
 
-```{r}
+More investigation should be made into this discrepancy. One explanation could be that employees could have used more than one credit card with their loyalty card. Another explanation could be that there is a new employee who has not received the loyalty card. 
+
+Given that the distinct employee count is significantly fewer than the number of distinct loyalty and credit cards, we should check with Gastech if there are any employees missing from this list. We should not expect the number of distinct employees and distinct loyalty cards to differ significantly as it does not make sense to issue an employee with multiple loyalty cards.
+
+```{r, fig.cap="Distinct employee names"}
 ##distinct employee names
 distinct_empname <- location_carid_join  %>%
   group_by(FirstName, LastName) %>%
   summarize(mean = mean(hour)) %>%
   drop_na(FirstName)
 
-distinct_empname <- data.frame(distinct_empname)
 distinct_empname <- subset(distinct_empname, select = -c(mean))
 
-
-DT::datatable(distinct_empname, caption = "Distinct employee names", filter = 'top', options = list(columnDefs = list(list(className = 'dt-center', targets = 0:3, autoWidth = TRUE, scrollX = TRUE))))
+DT::datatable(distinct_empname, filter = 'top', options = list(columnDefs = list(list(className = 'dt-center', targets = 0:2, autoWidth = TRUE, scrollX = TRUE))))
 ```
 
-```{r}
+```{r, fig.cap="Distinct loyalty card numbers"}
 ##distinct loyalty cards
-DT::datatable(distinct_loyalty, caption = "Distinct loyalty card numbers", options = list(columnDefs = list(list(className = 'dt-center', targets = 0:2, width = '20%'))))
+DT::datatable(distinct_loyalty, options = list(columnDefs = list(list(className = 'dt-center', targets = 0:2, width = '20%'))))
 ```
 
-```{r}
+```{r, fig.cap="Distinct credit card numbers"}
 ##distinct credit cards
-DT::datatable(distinct_cc, caption = "Distinct credit card numbers", options = list( columnDefs = list(list(className = 'dt-center', targets = 0:2, width = '20%'))))
+DT::datatable(distinct_cc, options = list( columnDefs = list(list(className = 'dt-center', targets = 0:2, width = '20%'))))
 ```
 
-From the car assignment dataset provided, we observe that there are nine truck drivers with no ID. This is consistent with what Gastech has explained, which is that employees who do not have company cars have the ability to check out company trucks for business use, but these trucks cannot be used for personal business.
+2) From the car assignment dataset provided, we observe that there are nine truck drivers with no ID. This is consistent with what Gastech has explained, which is that employees who do not have company cars have the ability to check out company trucks for business use, but these trucks cannot be used for personal business.
 
 The case scenario does not state which CarIDs are referring to trucks. However, assuming that the 3 digit CarID represents trucks, we only note GPS data for five trucks. There is no evidence as to whether the truck ID is sequential or if each truck driver is assigned to a truck. Given that there are 9 truck drivers and only 5 truck GPS data provided, there is possibility that:
-1) Each truck driver is not assigned to a unique truck and trucks can be shared.
-2) There are 4 GPS paths missing in the GPS dataset
+    a) Each truck driver is not assigned to a unique truck and trucks can be shared.
+    b) There are 4 GPS information missing in the GPS dataset.
 
 To perform further investigation on this, we will plot the GPS paths of each carID over the Abila map to identify their route.
 
-```{r}
+```{r, fig.cap="Employees with no assigned car"}
 ##Employees with no cars assigned
 missing_carid <- location_carid_join  %>%
   group_by(id) %>%
   filter(is.na(id))
 missing_carid = subset(missing_carid, select = -c(lat,long,date,day,hour))
 
-DT::datatable(missing_carid, caption = "Truck Driver with no assigned car", filter = 'top', options = list(autoWidth = TRUE, scrollX = TRUE))
+DT::datatable(missing_carid, filter = 'top', options = list(autoWidth = TRUE, scrollX = TRUE))
 ```
 
-```{r}
+```{r, fig.cap="CarID with no assigned employee"}
 ##Cars not assigned to employees
 missing_empname <- location_carid_join  %>%
   group_by(id, FirstName, LastName) %>%
@@ -392,17 +391,14 @@ missing_empname <- location_carid_join  %>%
   select(id) %>%
   unique()
 
-DT::datatable(missing_empname, caption = "CarID with no assigned employee", options = list(columnDefs = list(list(className = 'dt-center', targets = 0:3, width = '25%'))))
+DT::datatable(missing_empname, options = list(columnDefs = list(list(className = 'dt-center', targets = 0:3, width = '25%'))))
 ```
 
+### 2.2 GeoVisual Analysis
 
-### GeoVisual Analysis
+We will first perform georeferencing using the SHP files provided.
 
-### Network Visualisation and Analysis
-
-*Working with geospatial data*
-
-### Georeferencing
+*Georeferencing*
 
 1. Download and launch QGIS, an open-sourced GIS software. 
 
@@ -410,9 +406,11 @@ DT::datatable(missing_empname, caption = "CarID with no assigned employee", opti
 
 ![Figure 3: Start new project](Image/NewProject.JPG){width=50%}
 
+
 3. Add a vector layer. Navigate to Add Layer > Add Layer > Add Vector Layer
 
 ![Figure 4: Add vector layer](Image/AddVectorLayer.JPG){width=70%}
+
 
 4. Click on the "..." button and navigate to location of Abula.shp file. Click on Add. You should see Figure 6 in your main pane.
 
@@ -420,23 +418,27 @@ DT::datatable(missing_empname, caption = "CarID with no assigned employee", opti
 
 ![Figure 6: Current map](Image/CurrentMap.JPG)
 
+
 5. To make the map clearer, we will then change the lines from green to black. Right click on Abila under the layers panel > select Properties > select Symbology > click on the arrow dropdown next to Color and select black > Click Apply and Ok.
 
 ![Figure 7: Select Properties](Image/LayerPanel.JPG){width=50%}
 
 ![Figure 8: Change line color](Image/ChangeColor.JPG)
 
+
 6. To perform the georeferencing, click on Raster on the top pane > Georeferencer. When the new window appears, click on the blue square symbol on the top left to access the image file. Navigate to the MC2- tourist JPG file. In order to perform georeferencing, we need to select reference points (at least 6 control points) from the tourist map to match to the corresponding points on the SHP file map.
 
 ![Figure 9: Perform georeferencing](Image/Georeferencer.JPG){width=50%}
 
-![Figure 10: Perform georeferencing](Image/Symbol.JPG){width=50%}
+![Figure 10: Click on blue symbol](Image/Symbol.JPG){width=50%}
+
 
 7. To match the corresponding points, click on the identify tool on the top pane. Hover over the suspected corresponding point and click on it. The Identify Results pane appears on the right corner. Observe the results by matching the road name specified on the Identify Results pane to the tourist map.
 
 ![Figure 11: Use the identify function to match corresponding points](Image/Identify.JPG)
 
 ![Figure 12: Observe results to ensure correct point has been selected](Image/Results.JPG){width=50%}
+
 
 8. Once checked to be correct, under the Georeferencer, click on the selected point on the tourist map. On the Enter Map Coordinates window that appears, click on From Map Canvas and hover over the Shp file map. Ensure the crosshair is as close as possible to the actual point. By clicking on the point, this captures the X and Y coordinates. Click Ok. The GCP table in the Georeferencer window will be updated with the first reference point. Repeat the above steps for the other cross-reference points.
 
@@ -446,6 +448,7 @@ DT::datatable(missing_empname, caption = "CarID with no assigned employee", opti
 
 ![Figure 15: GCP table](Image/GCP.JPG)
 
+
 9. To check the settings, select Settings > Transformation Settings. Select the following settings as specified in Figure 17. Note that if the Target SRS is not set to WGS 84, click on the globe symbol next to the field and type "4326" under the filter pane. Select WGS 84 when it appears as the filtered result. Under output settings, ensure results are saved in a TIF file format for usage subsequently. Click on the tickbox next to "Save GCP points" and "Load in QGIS when done". Click ok.
 
 ![Figure 16: GCP table](Image/TfmSettings.JPG)
@@ -454,15 +457,18 @@ DT::datatable(missing_empname, caption = "CarID with no assigned employee", opti
 
 ![Figure 18: Update Target SRS](Image/TargetSRS.JPG){width=80%}
 
+
 10. Select file on the top pane > select Start Georeferencing. Once georeferencing is completed, minimise the georeferencer pane and switch back to the map.
 
 ![Figure 19: Start georeferencing](Image/StartGeo.JPG){width=60%}
+
 
 11. Under the layers pane on the left, drag the image file below the Abila streetmap so that the streetmap can be plotted on top of the tourist map. Doing a check, we observe that the streetmap is well-aligned with the image file. The TIF file created can then be used in RStudio as a raster object.
 
 ![Figure 20: Rearrange layers](Image/RearrangeLayers.JPG){width=60%}
 
 ![Figure 21: Georeferenced Map](Image/GeoreferencedMap.JPG)
+
 
 After preparing the georeferencing, we will then import the raster layer into RStudio.
 
@@ -505,7 +511,8 @@ Next, join the gps points into movement paths by using the drivers' IDs as uniqu
 gps_path <- gps_sf %>%
   group_by(id, day, timegroup, hour) %>%
   summarize(m = mean(Timestamp), do_union = FALSE) %>%
-  st_cast("LINESTRING")
+  st_cast("LINESTRING") %>%
+  rename("timestamp" = "m") 
 ```
 
 Checking the data, we noticed single coordinates pair in the line feature. The following code chunk is to identify and remove the orphan lines.
@@ -529,27 +536,27 @@ tm_shape(bgmap) +
   tm_rgb(bgmap, r = 1, g = 2, b = 3, alpha = NA, saturation = 1, interpolate = TRUE, max.value = 255) +
   tm_shape(gps_path_selected) +
   tm_lines(col= "red")
-
 ```
 
-By plotting the GPS coordinates using the Abila tourist map as background, we are able to visualize the path each vehicle is using. The map is also interactive. Clicking on any point in the trajectory allows us to see the CarID, day and timestamp of the respective route. This allows us to match the timestamp and location back to the credit card dataset, hence matching the credit card numbers to their corresponding CarID.
+By plotting the GPS coordinates using the Abila tourist map as background, we are able to visualize the path each vehicle is taking. The map is also interactive. Clicking on any point in the trajectory allows us to see the CarID, day and timestamp of the point in the route. This allows us to match the timestamp and location back to the credit card dataset, hence matching the credit card numbers to their corresponding CarID.
 
-After mapping the GPS trajectories, We also noted that there were no GPS data indicating that any car stopped near "Bean There Done That", "Brewed Awakenings", "Coffee Shack" and "Jack's Magical Beans" during the period of transactions- 12:00pm. Hence, these transactions are either incorrectly timed or may even be fraudulent.
+#### 2.2.1 Anomalies
+
+1) After mapping the GPS trajectories, We also noted that there were no GPS data indicating that any car stopped near "Bean There Done That", "Brewed Awakenings", "Coffee Shack" and "Jack's Magical Beans" during the period of transactions- 12:00pm. Hence, these transactions are either incorrectly timed or may even be fraudulent.
 
 ```{r, layout="l-body-outset", fig.width=6, fig.height=20}
 ##Facet map
 gps_path_selected <- gps_path_cleaned %>%
   filter(hour == 12)
   
-tmap_mode("plot")
+tmap_mode("view")
 tm_shape(bgmap) +
   tm_rgb(bgmap, r = 1, g = 2, b = 3, alpha = NA, saturation = 1, interpolate = TRUE, max.value = 255) +
   tm_shape(gps_path_selected) +
-  tm_lines() +
-  tm_facets(by = "id", ncol = 3)
+  tm_lines(col= "red")
 ```
 
-Furthermore as mentioned above, we also noted that there are several transactions in Kronos Mart at 3am on 13 January and 19 January. By filtering the map for 3am, we noted that there were no cars near Kronos Mart. Hence, these transactions are either incorrectly timed or may even be fraudulent.
+2) Furthermore as mentioned above, we also noted that there are several transactions in Kronos Mart at 3am on 13 January and 19 January. By filtering the map for 3am, we noted that there were no cars near Kronos Mart. Hence, these transactions are either incorrectly timed or may even be fraudulent. 
 
 ```{r, layout="l-body-outset", fig.width=6, fig.height=3}
 ##Facet map
@@ -560,17 +567,21 @@ tmap_mode("plot")
 tm_shape(bgmap) +
   tm_rgb(bgmap, r = 1, g = 2, b = 3, alpha = NA, saturation = 1, interpolate = TRUE, max.value = 255) +
   tm_shape(gps_path_selected) +
-  tm_lines() +
+  tm_lines(col= "red") +
   tm_facets(by = "id", ncol = 3)
 ```
 
-### Qn3- Can you infer the owners of each credit card and loyalty card? What is your evidence? Where are there uncertainties in your method? Where are there uncertainties in the data?
+**Qn3- Can you infer the owners of each credit card and loyalty card? What is your evidence? Where are there uncertainties in your method? Where are there uncertainties in the data?**
 
-By plotting the GPS coordinates using the Abila tourist map as background, we are able to visualize the path each vehicle is using. The map is also interactive. Clicking on any point in the trajectory allows us to see the CarID, day and timestamp of the respective route. This allows us to match the timestamp and location back to the credit card dataset, hence matching the credit card numbers to their corresponding CarID. Alternatively, we can also use a facet map by hour of day to identify location of each card during each hour of the day.
+### 3.1 GeoVisual Analysis
 
-By following the GPS coordinates of each carID, we are then able to identify the time that they arrive at certain points of interest in the map. With this information, we can match the points of interest to the credit card at these locations, based on the timestamp on the GPS data and credit card data. After matching the unique CarID to the credit cards, we can then derive the owner of each card based on the car assignment data. using a facet map allows us to visualize the route for each car during each hour across each of the 14 days of GPS data in record. This allows for easy observation and matching to the credit card data.
+#### 3.1.1 Match CarID to credit card data
 
-We have used an interative map and facet map below to visualize the route for CarID 1 across 1/6/2014. This allows for easy observation and matching to the credit card data. 
+By plotting the GPS coordinates using the Abila tourist map as background, we are able to visualize the path each vehicle is using. The map is interactive- clicking on any point in the trajectory allows us to see the CarID, day and timestamp of the respective route. This allows us to match the timestamp and location back to the credit card dataset, hence matching the credit card numbers to their corresponding CarID. Alternatively, we can also use a facet map by hour of day to identify location of each card during each hour of the day.
+
+By following the GPS coordinates of each carID, we are then able to identify the time that they arrive at certain points of interest in the map. With this information, we can match the points of interest to the credit card transactions at these locations, based on the timestamp on the GPS data and credit card data. After matching the unique CarID to the credit cards, we can then derive the owner of each card based on the car assignment data. Using a facet map allows us to visualize the route for each car during each hour across each of the 14 days of GPS data in record. This allows for easy observation and matching to the credit card data.
+
+We have used an interactive map and facet map below to visualize the route for CarID 1 across 1/6/2014. This allows for easy observation and matching to the credit card data. 
 
 ```{r, layout="l-body-outset", fig.width=6, fig.height=5}
 ##Plotting GPS paths- interactive map
@@ -584,7 +595,7 @@ tm_shape(bgmap) +
   tm_lines(col= "red")
 ```
 
-In this case, we can see that the day begins at 0700 where CarID drives towards Hallowed Grounds and reaches Gastech at 0800. During lunch, CarID drives towards Albert's Fine Clothes and departs during 1300 back to Gastech. At the end of the day, CarID 1 leaves Gastech toward Hallowed Grounds. At 1900, CarID leaves Hallowed Grounds for Albert's Fine Clothes and departs at 2000 back to Hallowed Grounds. At 2200, CarID once again departs Hallowed Grounds for Gastech.
+In this case, we can see that the day begins at 0720 where Car 1 drives towards Hallowed Grounds and stops here for 35 minutes. It then leaves Hallowed Grounds at 0757 and reaches Gastech at 0804. At 1217, Car 1 drives towards Albert's Fine Clothes, arriving at 1226. It departs at 1325 back to Gastech and arrives at 1334. At 1744, Car 1 leaves Gastech toward the area near Hallowed Grounds, arriving at 1748. At 1936, Car 1 leaves the area near Hallowed Grounds for an area near Albert's Fine Clothes and arrives at 1949. It then departs at 2027 back to the area near Hallowed Grounds, arriving at 2033. At 2211, Car 1 once again departs the area near Hallowed Grounds for Gastech, arriving at 2215, and only returns to the area near Hallowed Grounds at 0100 on 01/07/2014, arriving at 0114.
 
 ```{r, layout="l-body-outset", fig.width=6, fig.height=5}
 ##Facet map- by hour
@@ -599,11 +610,13 @@ tm_shape(bgmap) +
   tm_facets(by = "hour", ncol = 3)
 ```
 
-BY visualizaing the route, we can filter the below credit card table for the relevant day, hour and location. The datatable below allows for multiple filters and this allows us to narrow down the list of credit cards which fits the criteria across the day. By repeating this process across the 14 days credit card transaction and location data provided, we will be able to match the credit card to CarID.
+By visualizaing the route, we can filter the below credit card table for the relevant day, hour and location. The datatable below allows for multiple filters and this allows us to narrow down the list of credit cards which fits the criteria across the day. By repeating this process across the 14 days credit card transaction and location data provided, we will be able to match the credit card to CarID. 
+
+In this case, by filtering the below table for Hallowed Grounds on day 6, hour 7, we noted that credit card number ending with 9551 is on the list of transactions. Repeating this process for the locations visited throughout the 2 weeks period, we have matched Car 1 to credit card number ending with 9551.
 
 ```{r}
 cc_data_cleaned_min <- subset(cc_data_cleaned, select = -c(daynumber, timestamp))
-DT::datatable(cc_data_cleaned_min, filter = "top", options = list(columnDefs = list(list(targets = 0:8, width = '10%'))))
+DT::datatable(cc_data_cleaned_min, filter = "top", fillContainer = T, options = list(scrollX=TRUE, autoWidth=TRUE, scroller=TRUE, scrollY = '450px'))
 ```
 
 Based on interactive filtering and visualization of the maps above, we were able to match the GPS trajectories to the credit card data provided, based on location and timestamp. In the process, we noted that there car trajectories match more than 1 credit card match. This is seen for employees in the facilities department (carID: 29, 100 to 107). We also noted some credit cards without a CarID match.
@@ -619,7 +632,7 @@ cc_carid_match$last4ccnum = as.factor(cc_carid_match$last4ccnum )
 glimpse(cc_carid_match )
 ```
 
-Using the above dataset, we will be able to identify the owners of each credit card by matching the carID to the car assignment dataset. We noted that Ovan Bertrand (Facilities Group Manager) uses 2 different credit cards. 
+Using the above dataset, we will be able to identify the owners of each credit card by matching the carID to the car assignment dataset. Scanning through the table, we noted that Ovan Bertrand (Facilities Group Manager) is assigned CarID 29 and uses 2 different credit cards (1- ending with 3547, 2- ending with 5921).
 
 In the car assignment dataset provided, truck drivers are not assigned to a particular truck number. Hence we are unable to identify which credit card belongs to which truck driver as there is no car assignment information provided. We have managed to match the trajectories of trucks to 9 different credit cards, which coincides with the number of truck drivers. Hence this reinforces our opinion that trucks are shared among the truck drivers. With the limited information, we are unable to match the credit card to truck driver, but only to the CarID.
 
@@ -630,11 +643,18 @@ cc_carid_emp_match_NT <- cc_carid_match %>%
   left_join(assignment_data, "CarID") %>%
   arrange(CarID)
 
+DT::datatable(cc_carid_emp_match_NT, filter = "top", fillContainer = T, options = list(scrollX=TRUE, autoWidth=TRUE, scroller=TRUE, scrollY = '450px'))
+```
+
+```{r}
 ##Truck drivers
 cc_carid_emp_match_T <- cc_carid_match %>%
   filter(CarID == 100 | CarID == 101 | CarID == 102 | CarID == 103 | CarID == 104 | CarID == 105 | CarID == 106 | CarID == 107) %>%
   arrange(CarID)
+cc_carid_emp_match_T 
 ```
+
+#### 3.1.2 Match credit card to loyalty card
 
 After matching the timestamp of credit card transactions to CarID using the trajectory visualization, we can then match the credit card and loyalty card owners, using full join on 3 criteria match- 1) Date, 2) Location and 3) Price. 
 
@@ -653,45 +673,72 @@ After the full join, we noted that there are some transactions whereby the amoun
 
 ```{r, fig.height=6}
 ##Group by credit card number and loyalty card number
-loyalty_cc_match <- loyalty_cc_match %>%
+loyalty_cc_match_group <- loyalty_cc_match %>%
   group_by(last4ccnum, loyaltynum) %>%
   summarise(sumprice = sum(price)) %>%
   drop_na("last4ccnum", "loyaltynum")
 
 ##Check if each credit card is matched to each loyalty card
-loyalty_cc_match_count <- loyalty_cc_match %>%
+loyalty_cc_match_count <- loyalty_cc_match_group %>%
   group_by(last4ccnum) %>%
   summarise(loyalty_card_count = n()) %>%
   arrange(desc(loyalty_card_count))
 
-DT::datatable(loyalty_cc_match_count, filter = 'top', options = list(columnDefs = list(list(className = 'dt-center', targets = 0:2))))
+loyalty_cc_match_count
 ```
 
-Based on the above results, we noted that there are seven credit cards mapped to more than 1 loyalty card. This is likely to be a duplicate due to the method being used to match both cards. We will investigate each match individually to identify if its a true match or simply a coincidence.
-
-After further investigation, it is noted that there are several transactions made on the same day for L3288 and L6267. Hence it is unlikely to be a coincidence. Loyalty card L3288 and L6267 are being used together with 2 credit cards.
+Based on the above results, we noted that there are seven credit cards mapped to more than 1 loyalty card. This is likely to be a duplicate due to the method being used to match both cards. We will investigate each match individually to identify if its a true match or simply a coincidence. To differentiate the former from the latter, we will assess if there are several transactions made with the same combination of credit and loyalty card number. If there is only a single transaction made with the same combination, it is likely a coincidence. This can be done using the interactive datatable below.
 
 ```{r}
-loyalty_cc_match_count_filtered <- loyalty_cc_match_count %>%
-  filter(loyalty_card_count >= 2)
+DT::datatable(loyalty_cc_match, extensions='Scroller', fillContainer = T, filter = "top", options = list(scrollX=TRUE, autoWidth=TRUE, scroller=TRUE, scrollY = '450px')) %>% formatDate(4, method = 'toLocaleDateString')
+```
 
-loyalty_cc_match_count_selected <- loyalty_cc_match %>%
-  filter(last4ccnum %in%loyalty_cc_match_count_filtered$last4ccnum)
+After further investigation, it is noted that there are several transactions made with the same combination of credit and loyalty card number for the following combination:
+    - Credit card number ending with 1286, matched with loyalty card number L3288 and L3572 
 
-loyalty_cc_match_obs <- cc_data_cleaned %>%
+Hence the above is unlikely to be a coincidence. Loyalty cards L3288 and L3572 are being used together with the same credit card.
+
+We will then perform a check on whether each loyalty card is used with one or multiple credit cards. We see eight loyalty cards matched to multiple credit cards.
+
+To prevent similar case of coincidence from the matching method above, we filter for combinations with more than 1 transaction using the interactive datatable below. From the table below, we observe that L3288 and L6267 are used with 2 different credit cards.
+    1) Loyalty card number L3288, matched with credit card number ending with 1286 and 9241
+    2) Loyalty card number L6267, matched with credit card number ending with 6691 and 6899
+
+```{r}
+##Check for loyalty cards matched to multiple credit card
+cc_loyalty_match_count <- cc_data_cleaned %>%
   full_join(loyalty_data_cleaned, by = c("date", "location", "price")) %>%
   group_by(last4ccnum, loyaltynum) %>%
   summarise(txncount = n()) %>%
-  filter(loyaltynum == "L3288" | loyaltynum == "L6267" | loyaltynum == "L2070" | loyaltynum == "L9406" | loyaltynum == "L2247") %>%
+  drop_na("last4ccnum", "loyaltynum") %>%
+  group_by(loyaltynum) %>%
+  summarise(cc_count = n()) %>%
+  arrange(desc(cc_count))
+
+cc_loyalty_match_count
+```
+
+```{r}
+##Check for loyalty cards matched to multiple credit card, with > 1 txn
+cc_loyalty_match_obs <- cc_data_cleaned %>%
+  full_join(loyalty_data_cleaned, by = c("date", "location", "price")) %>%
+  group_by(last4ccnum, loyaltynum) %>%
+  summarise(txncount = n()) %>%
   filter(txncount > 1) %>%
   drop_na("last4ccnum", "loyaltynum") %>%
   group_by(loyaltynum) %>%
   summarise(cc_count = n()) %>%
-  filter(cc_count > 1)
+  arrange(desc(cc_count))
+
+cc_loyalty_match_obs
 ```
 
-Given the assumption that the other multiple matches are due to coincidence, we will drop those other matches.
+```{r}
+DT::datatable(loyalty_cc_match, extensions='Scroller', fillContainer = T, filter = "top", options = list(scrollX=TRUE, autoWidth=TRUE, scroller=TRUE, scrollY = '450px')) %>% formatDate(4, method = 'toLocaleDateString')
+```
 
+Given the assumption that the combination of credit and loyalty cards with only one transaction are due to coincidence, we will drop these duplicate matches.
+    
 ```{r}
 loyalty_cc_match_cleaned<-loyalty_cc_match[!(loyalty_cc_match$last4ccnum == "4795" & loyalty_cc_match$loyaltynum == "L2070" | loyalty_cc_match$last4ccnum == "5921" & loyalty_cc_match$loyaltynum == "L9406" | loyalty_cc_match$last4ccnum == "7889" & loyalty_cc_match$loyaltynum == "L2247" | loyalty_cc_match$last4ccnum == "4948" & loyalty_cc_match$loyaltynum == "L3295" | loyalty_cc_match$last4ccnum == "5368" & loyalty_cc_match$loyaltynum == "L6119" | loyalty_cc_match$last4ccnum == "8332" & loyalty_cc_match$loyaltynum == "L8566"),]
 ```
@@ -704,19 +751,29 @@ cards_emp_match <- left_join(loyalty_cc_match_cleaned, cc_carid_match, by = "las
   left_join(assignment_data, by = "CarID")
 ```
 
-Uncertainties in method:
-    - Assumption that employee will make a transaction when they visit a location. GPS coordinates only infer that the employee was at a certain area but does not mean that he/she has to make any purchases when at that location. Hence matching GPS data to transaction data alone may not be accurate in some instances where employee does not spend/ makes purchases using cash instead of credit card.
-    - As the tourist map only provides information about certain tourist attractions and not all the locations in Abila, we are unable to match the full list of transactions from trajectory as seen in the map view to the transactions occurring in locations which are not reflected in tourist map (e.g. Abila Zacharo). Furthermore, as Abila is relatively small, many of the GPS trajectories for different cars overlap. This may result in incorrect matching as it is more of a guesswork as not all points in the trajectory can be mapped to an actual transaction.
-    - There are differences in the amount recorded on credit card and loyalty card for certain transactions, hence resulting in N/As in the joined dataset. We have removed the rows with N/As and instead worked with the joined data. However, this is based on the assumption that card transactions with same date, location and price relate to the same transaction. There may be instances of pure coincidence when this is not true, as described above.
-    - Employee may not have used their assigned car or made a purchase using their own loyalty/ credit card.
-    
-Uncertainties in data:
-    - As mentioned above, there are 44 unique CarID GPS coordinates provided. However, the number of unique credit and debit cards exceed 44. Hence, we are unable to map these other credit and loyalty cards to the CarID.
-    - We noted that some of the timestamps provided in the credit card data seems inaccurate. The transaction data for "Been There Done That". "Brewed Awakenings" and "Jack's Magical Beans" are all transacted on 12:00 time. Hence I suspect that this does not represent the actual time of the transaction. Hence it is inaccurate to match GPS coordinates timestamp to the timestamp of these transactions.
-    - Background story did not specify how truck IDs are segregated from CarIDs. We have inferred these based on the difference in ID, inferring that truck IDs are three digit IDs.
-    - Truck drivers are not assigned a particular truck. Hence even though we are able to match the GPS trajectories of these trucks to certain credit cards, we are unable to match the credit and loyalty cards back to the employees, unless we are provided with information regarding which employee has checked out which truck at certain timings.
+### 3.2 Uncertainties in method
 
-### Qn4- Given the data sources provided, identify potential informal or unofficial relationships among GASTech personnel. Provide evidence for these relationships. 
+1) **Assumption that employee will make a transaction when they visit a location.** GPS coordinates only infer that the employee was at a certain area but does not mean that he/she has to make any purchases when at that location. Hence matching GPS data to transaction data alone may not be accurate in some instances where employee does not spend or makes purchases using cash instead of credit card, which will not reflect in the credit card transaction dataset.
+
+2) As the tourist map only provides information about certain tourist attractions and not all the locations in Abila, we are unable to match the full list of locations from trajectory as seen in the map view to the transactions occurring in locations which are not reflected in tourist map (e.g. Abila Zacharo). This may result in **incorrect matching as it is more of a guesswork** as not all locations visited in the GPS trajectory can be mapped to an actual transaction.
+
+3) There are **differences in the amount recorded on credit card and loyalty card for certain transactions**, hence resulting in N/As in the joined dataset. We have removed the rows with N/As and instead worked with the joined data. However, this is based on the assumption that card transactions with same date, location and price relate to the same transaction. There may be instances of **pure coincidence** when this is not true, as described above.
+
+4) We use the GPS coordinates of the car and credit card transactions to determine the employee's location. However, **employees may not have used their assigned car, or may not have made a purchase using their own loyalty or credit card**.
+    
+### 3.3 Uncertainties in data
+
+1) Assuming that the car assignment list provided includes all employees, we noted that there are 44 distinct employees. However, we noted that there are 40 distinct GPS coordinates, 55 distinct credit card numbers and 54 distinct loyalty card numbers. Hence, we are **unable to map some of these other credit and loyalty cards to a CarID**. This may be because the car assignment data may not comprise of all employees.
+
+2) We noted that some of the **timestamps provided in the credit card data seems inaccurate**. The transaction data for "Been There Done That". "Brewed Awakenings" and "Jack's Magical Beans" are all transacted on 12:00 time. Hence I suspect that this does not represent the actual time of the transaction. Therefore it is inaccurate to match GPS coordinates timestamp to the timestamp of these transactions.
+
+3) **Background information did not specify how truck IDs are identified from the list of CarIDs.** We have inferred these based on the difference in IDs, inferring that truck IDs are three digit IDs.
+
+4) **Truck drivers are not assigned a particular truck.** Hence even though we are able to match the GPS trajectories of these trucks to certain credit cards, we are unable to match the credit and loyalty cards back to the employees, unless we are provided with information regarding which employee has checked out which truck at certain timings.
+
+**Qn4- Given the data sources provided, identify potential informal or unofficial relationships among GASTech personnel. Provide evidence for these relationships.**
+
+### Network Visualisation
 
 We will first create a network graph using the following code chunks.
 
@@ -794,13 +851,15 @@ cc_graph <- tbl_graph(nodes = cc_nodes,
                       directed = FALSE)
 ```
 
+First, we can facet the graph by day and timegroup. Users can update the cc_edges_selected to observe the facet graph for each day. The facet below is for day 01/06/2014. From the facet graph, we observe that the interactions mainly occur in the morning (0700-0900), lunc time (1200-1400) and after work (1700-2100).
+
 ```{r, layout="l-body-outset", fig.width=12, fig.height=10}
 ##Facet
-cc_edges <- cc_edges %>%
+cc_edges_selected <- cc_edges %>%
   filter(day == 6)
 
 cc_graph <- tbl_graph(nodes = cc_nodes,
-                      edges = cc_edges,
+                      edges = cc_edges_selected,
                       directed = FALSE)
 
 set_graph_style()
@@ -814,34 +873,13 @@ th_foreground(foreground = "grey80",
 border = TRUE) +
 theme(legend.position = 'bottom')
 ```
-
-```{r, layout="l-body-outset", fig.width=12, fig.height=10}
-##Visualizing network metrics- centrality indices
-g <- cc_graph %>%
-  ggraph(layout = "fr") +
-  geom_edge_link(aes(width = weight), alpha=0.2) +
-  scale_edge_width(range = c(0.1, 5)) +
-  geom_node_point(aes(colour = group, size = centrality_betweenness()))
-g + theme_graph()
-```
-
-
-##Visualizing community
-g <- cc_graph %>%
-  mutate(community = as.factor(group_optimal(weights = weight))) %>%
-  ggraph(layout = "fr") +
-  geom_edge_link(aes(width = weight), alpha=0.2) +
-  scale_edge_width(range = c(0.1, 5)) +
-  geom_node_point(aes(colour = community))
-g + theme_graph()
-
-
 By using the below interactive network graph together with the use of a datatable, we are able to visualize the interactions between parties and locations and use the datatable to filter for the relevant parties and locations to identify whether they were in the same location during the same period.
 
-For example, 
+For example, filtering for Desafio Golf Course highlights the employees who have visited the location over the two week period, We note that they are in the Executives department. We will then filter the datatable below for Desafio Golf Course and noted that there were several executives who were in this location on the same date and time, hence indicating a probable interaction between these executives.
 
 ```{r, layout="l-body-outset", fig.width=10, fig.height=9}
 ##Interactive viz
+
 visNetwork(cc_nodes, cc_edges, height = "800px", width = "100%") %>%
   visIgraphLayout(layout = "layout_in_circle") %>%
   visOptions(highlightNearest = TRUE, nodesIdSelection = TRUE, selectedBy = "group") %>%
@@ -859,9 +897,11 @@ cc_data_cleaned_matched <- subset(cc_data_cleaned_matched, select = -c(timestamp
 DT::datatable(cc_data_cleaned_matched, fillContainer = T, extensions='Scroller', filter = "top", options = list(scrollX=TRUE, autoWidth=TRUE, scroller=TRUE, scrollY = '450px'))
 ```
 
+### Network Analysis
+
 We have derived the following potential informal relationships between employees.
 
-1) Desafio Golf course- Several of the executives were congregated at the Desafio Golf Course on Sundays. Willem Vasco-Pais (Environmental Safety Advisor), Ingrid Barranco(SVP/CFO) and Ada Camp-Corrente (SVP/CIO) were present on 12/1/2014 at 1300-1400 and 19/1/2014 at 1200-1500. Sten Sanjorge Jr (President/CEO) and Orhan Strum (SVP/COO) joining during the second session.
+1) Desafio Golf course- Several of the executives were congregated at the Desafio Golf Course on Sundays. Willem Vasco-Pais (Environmental Safety Advisor), Ingrid Barranco (SVP/CFO) and Ada Camp-Corrente (SVP/CIO) were present on 12/1/2014 at 1300-1400 and 19/1/2014 at 1200-1500. Sten Sanjorge Jr (President/CEO) and Orhan Strum (SVP/COO) joining during the second session.
 
 2) Chostus Hotel- We see Elsa Orilla (Drill Technician) and Brand Tempestad (Drill Technician) from Engineering department checking into Chostus Hotel frequently on weekdays during lunch hour, up to four times over the two weeks observed. On further investigation, there are two employees with last name Orilla. We do not have further information on whether there is a relationship between them. However if they are partners, this may present as an illicit relationship given that it occurs frequently during lunch hours on weekdays when Kare Orilla is having lunch elsewhere.
 
@@ -871,7 +911,7 @@ We have derived the following potential informal relationships between employees
 
 5) Coffee Shack is visited by only one person with last 4 credit card number 7117 during lunch hour, on most weekdays.
 
-6) Bean There Done That is popular with the Engineering team during lunch hour on most weekdays, with no transactions by these same group over the weekends.
+6) Bean There Done That is popular with the Engineering team during lunch hour on most weekdays, with no transactions by this same group over the weekends.
 
 7) Brewed Awakenings is favoured by Ingrid Barranco (SVP/CFO), Elsa Orilla (Drill Technician) and Ada Campo-Corrente (SVP/CIO) during lunch hour and they make purchases there frequently during the same periods, hence would probably have crossed paths here.
 
@@ -882,19 +922,26 @@ We have derived the following potential informal relationships between employees
     - On 8/1/2014, 9/1/2014, 10/1/2014, 13/1/2014, 14/1/2014, 15/1/2014, 16/1/2014 and 17/1/2014, they made transactions at Brew've Been Served at 0700-0800.
     - On 14/1/2014, 19/1/2014, they made transactions at Katerina's Cafe at 1300.
     
-10) Both Birgitta Frente (Geologist) and Vira Frente (Hydraulic Technician) have the same last name. We do not have further information on whether there is a relationship between them. However, on further investigation, they seem to have a not have a particularly close relationship as there was only one time where they made transactions in the same location during the same date and hour- On 13/1/2014 at Bean There Done That at 1200.
+10) Both Birgitta Frente (Geologist) and Vira Frente (Hydraulic Technician) have the same last name. We do not have further information on whether there is a relationship between them. However, on further investigation, they do not seem to have a particularly close relationship as there was only one time where they made transactions in the same location during the same date and hour- On 13/1/2014 at Bean There Done That at 1200.
 
 11) There are other employees with the same last names such as Minke Mies and Henk Mies, Valeria Morlun and Adan Morlun, Claudio Hawelon and Benito Hawelon. However as some of them belong to the facilities truck drivers team, where due to the data limitations, we are unable to match each the CarID to Employee Name, we are unable to identify the routes of these truck drivers to determine if they were in the same location with the employees with similar last names.
 
-### Qn5- Do you see evidence of suspicious activity? Identify 1- 10 locations where you believe the suspicious activity is occurring, and why.
+**Qn5- Do you see evidence of suspicious activity? Identify 1- 10 locations where you believe the suspicious activity is occurring, and why.**
+
+### Suspicious Activities identified
 
 We have identified the following suspicious activities:
 
-1) Nils Calixto (IT Helpdesk) returned back to Gastech during late hours frequently. This is highly suspicious as the nature of his role does not seem to require returning to office during late nights when there are few employees at work. 
+1) **Unusual transactions and frequent overtime**
+
+Nils Calixto (IT Helpdesk) returned back to Gastech during late hours frequently. This is highly suspicious as the nature of his role does not seem to require returning to office during late nights when there are few employees at work. 
 
 From the facet graph below, we observe that he has returned to office during the period 2100-2400 on 08/01/2014, 15/01/2014 and 17/01/2014.
 
-Filtering the datatable below, we also observe that Nils Calixto has spent $10000 at Frydos Autosupply n' More. This expenditure has been identified as an outlier during our exploratory analysis performed earlier. This further raises suspicions due to the large transaction amount.
+Filtering the datatable below, we also observe that Nils Calixto has made several suspicious transactions on his credit card on 01/13/2014:
+    - Spent $10,000 at Frydos Autosupply n' More at 1920. This expenditure has been identified as an outlier during our exploratory analysis performed earlier. This further raises suspicions due to the large transaction amount. Furthermore, by tracking the car's movements throughout the day, we noted that the car was not at Frydos Autosupply n' More at this time.
+    - Made a purchase at U-Pump at 1318. However, we noted that Nils Calixto GPS coordinates put him at an area near Albert's Fine Clothes instead of U-Pump when the credit card transaction was made.
+    - Only person to have made a transaction at Daily Dealz at 0604. However, there were no GPS information during this time. As the vehicles are tracked as long as they are moving, one would assume that Nils Calixto did not drive to Daily Dealz to make the purchase.
 
 ```{r, layout="l-body-outset", fig.width=6, fig.height=5}
 ##Facet map- by day
@@ -913,17 +960,24 @@ tm_shape(bgmap) +
 DT::datatable(cc_data_cleaned_matched, extensions='Scroller', filter = "top", fillContainer = T, options = list(scrollX=TRUE, autoWidth=TRUE, scroller=TRUE, scrollY = '450px'))
 ```
 
-2) There seems to have been a gathering by certain employees on 10/1/2014 at till late. Employees only started leaving at around 2300. We filter for the day and hour and plotted a facet map. By tracing the employees route with the interactive facet map below, we noted that except for Isia Vann (Perimeter Control)(CarID 16), the other employees seem to leave the house in Carnero Street at around 2300 to return to their respective homes. We have excluded Isia Vann as the route is different from the others. We also noted that two other employees left the gathering later than the others- Felix Balas and Marin Onda. 
+2) **Gathering of employees** 
 
-The employees who attended the gathering seem to be mainly from the Engineering and Information Technology department:
+There seems to have been a gathering by certain employees on 10/1/2014 at till late. Employees only started leaving at around 2300. We filter for the day and hour and plotted a facet map. By tracing the employees route with the interactive facet map below, we noted that except for Isia Vann (Perimeter Control)(CarID 16), the other employees seem to leave the house in Carnero Street at around 2300 to return to their respective homes. We have excluded Isia Vann as the route is different from the others. We also noted that two other employees left the gathering later than the others- Felix Balas and Marin Onda. 
+
+The employees who attended the gathering seem to be mainly from the Engineering and Information Technology department. We noted that this area seems to be Lars Azada's house and hence he may be the host. We have inferred that this is his house as by tracking the trajectories of his movement, we noted that he tends to return to this location during afterwork hours.
     - Nils Calixto (IT Helpdesk)- CarID 1
     - Isak Baza (IT Technician)- CarID 5
+    - Linnea Bergen (IT Group Manager)- CarID 6
     - Lucas Alcazar (IT Technician)- CarID 8
+    - Lars Azada (Engineer)- CarID 2
     - Gustav Cazar (Drill Technician)- CarID 9
     - Axel Calzas (Hydraulic Technician)- CarID 11
     - Lidelse Dedos (Engineering Group Manager)- CarID 14
     - Vira Frente (Hydraulic Technician)- CarID 19
     - Kanon Herrero (Geologist)- CarID 25
+    - Elsa Orilla (Drill Technician)- CarID 7
+    - Birgitta Frente (Geologist)- CarID 18
+    - Isande Borrasca (Drill Technician)- CarID 28
     - Brand Tempestad (Drill Technician)- CarID 33
     - Felix Balas (Engineer)- CarID 3 (left later at 11/1/2014 0000)
     - Marin Onda (Drill Site Manager)- CarID 26 (left later at 11/1/2014 0000)
@@ -954,7 +1008,7 @@ tm_shape(bgmap) +
   tm_facets(by = "id", ncol = 3)
 ```
 
-3) Isia Vann (Perimeter Control)(CarID 16) visited a house in Barwyn Street late on 10/1/2014 at 2300 and only left on 11/1/2014 at 0300. This seems to be a one-time occurrence throughout the two weeks.
+3) Isia Vann (Perimeter Control)(CarID 16) visited a house in Barwyn Street late on 01/10/2014 at 2300 and only left on 11/1/2014 at 0300. This seems to be a one-time occurrence throughout the two weeks.
 
 ```{r}
 ##Interactive map
@@ -968,9 +1022,11 @@ tm_shape(bgmap) +
   tm_lines(col= "red")
 ```
 
-4) Meeting at Spetson Park at night between Loreto Bodrogi and Isia Vann 
-    - Loreto Bodrogi (Site Control, CarID 15) visited an area near Spetson Park on 07/01/2014 at 0335, departing from his house at 0320. He only departed the area at 0729 and made a purchase at Brewed Awakenings before heading directly to Gastech. 
-    - Isia Vann (Perimeter Control, CarID 16) also had a similar trajectory as Loreto Bodrogi. She left her house at 2301 on 06/01/2014 and arrived at the area near Spetson Park at 2309. She then remained in the same area and left only at 0730 and drove directly to Gastech without making any other stops. 
+4) **Monitoring of CIO's house at odd hours**
+
+The following employees have been visiting a similar location near Spetson Park late at night. On further investigation, this seems to be the Ada Campo-Corrente's (CIO) house. We have inferred that this is the CIO house as by tracking the trajectories of her movement, we noted that she tends to return to this location during afterwork hours.
+    - Loreto Bodrogi (Site Control, CarID 15) visited an area near Spetson Park on 01/07/2014 at 0335, departing from his house at 0320. He only departed the area at 0729 and made a purchase at Brewed Awakenings before heading directly to Gastech. 
+    - Isia Vann (Perimeter Control, CarID 16) also had a similar trajectory as Loreto Bodrogi. She left her house at 2301 on 01/06/2014 and arrived at the area near Spetson Park at 2309. She then remained in the same area and left only at 0730 and drove directly to Gastech without making any other stops. 
     - Both Loreto and Isia's paths would have crossed on their trip to the area near Spetson Park on 07/01/2014. They also left around the same time. They both took the same route to Gastech although Loreto Bodrogi made a transaction at Brewed Awakenings.
          
 5) Meeting at Taxiarchon Park at night between Loreto Bodrogi and Mies Minke 
@@ -980,16 +1036,18 @@ tm_shape(bgmap) +
     
 6) On 11/01/2014, Bertrand Ovan visited a sequence of places, without making any transactions. He left his house at 22:11, arriving at Brew've Been Served Cafe at 2212. After staying for 9 minutes, he went to the Ouzeri Elian, arriving at 2227. He then left at 2234 and headed for the place near Kronos Mart and arrived at 22:40. 15 minutes later, he went to the Alberts Fine Clothing arriving at 2258 and stayed there for another 23 minutes. He drove to an area near U-Pump or Jack Magic Beans, starting from 23:21 and arrived at the at 23:25. He stayed there for about 30 minutes, and arrived home at exactly 2359. This is quite unusual as he visited several locations without making any transactions. 
 
-7) Visiting a similar location late at night
-    -Isia Vann (Perimeter Control, CarID 16) left her house at 2300 on 10/1/2014 and arrived at the house near Ahaggo Museum at 2320. She then left only at 0323 on 11/1/2014 and drove home, arriving home at 0334.
-    - Minke Mies (Perimeter Control, CarID 24) also visited house near Ahaggo Musuem on 14/01/2014, departing from his house at 0320 and arriving at 0331. He only departed the area at 0747 and headed directly to Gastech. This seems to be the same area that Isia Vann visited on 10/1/2014.
-    - Hennies Osvaldo (Perimeter Control) also visited house near Ahaggo Musuem on 11/01/2014, departing from his house at 0320 and arriving at 0332. He only departed the area at 1102 on 11/01/2014 and headed to an area near Port of Abila, reaching at 1111. Hennies Osvaldo also made a similar trip on 13/1/2014, departing from his house at 2300 and arriving at 2308, leaving at 0330 on 14/1/2014 and arriving home at 0343 on 14/1/2014.
-    - Both Minke Mies and Hennies Osvaldo may have crossed paths on 14/1/2014 as they seem to only miss each other by a minute.
-    - Both Isia Vann  and Hennies Osvaldo may have crossed paths on 11/1/2014 as they seem to only miss each other by a short period of time.
+7) **Monitoring of CFO's house at odd hours**
+
+The following employees have been visiting a similar location late at night. On further investigation, this seems to be the CFO's house. We have inferred that this is the Ingrid Barranco's (CFO) house as by tracking the trajectories of her movement, we noted that she tends to return to this location during afterwork hours.
+    - Isia Vann (Perimeter Control, CarID 16) left her house at 2300 on 01/10/2014 and arrived at the house near Ahaggo Museum at 2320. She then left only at 0323 on 01/11/2014 and drove home, arriving home at 0334.
+    - Minke Mies (Perimeter Control, CarID 24) also visited house near Ahaggo Musuem on 01/14/2014, departing from his house at 0320 and arriving at 0331. He only departed the area at 0747 and headed directly to Gastech. This seems to be the same area that Isia Vann visited on 01/10/2014.
+    - Hennies Osvaldo (Perimeter Control, CarID 21) also visited house near Ahaggo Musuem on 01/11/2014, departing from his house at 0320 and arriving at 0332. He only departed the area at 1102 on 01/11/2014 and headed to an area near Port of Abila, reaching at 1111. Hennies Osvaldo also made a similar trip on 01/13/2014, departing from his house at 2300 and arriving at 2308, leaving at 0330 on 01/14/2014 and arriving home at 0343 on 01/14/2014.
+    - Both Minke Mies and Hennies Osvaldo may have crossed paths on 01/14/2014 as they seem to only miss each other by a minute.
+    - Both Isia Vann  and Hennies Osvaldo may have crossed paths on 01/11/2014 as they seem to only miss each other by a short period of time.
 
 8) Hennie Osvaldo's residences
 
-Hennies Osavado seems to own two residences- 1) Area next to Guy's Gyros, 2) Area near Frydo's Autosupply N'More. He typically returns to the second house on weekdays and the first house on weekends, with the exception of 08/01/2014.
+Hennies Osavado seems to own two residences- 1) Area next to Guy's Gyros, 2) Area near Frydo's Autosupply N'More. He typically returns to the second house on weekdays and the first house on weekends, with the exception of 01/08/2014.
 
 ```{r, layout="l-body-outset", fig.width=6, fig.height=4}
 ##Facet map- by day
@@ -1035,14 +1093,67 @@ tm_shape(bgmap) +
   tm_facets(by = "day", ncol = 3)
 ```
 
-10) Hennie Osvaldo, Minke Mies, Inga Ferro and Loreto Bodrogi usually take turns visiting a selected few locations during the lunch break (except for 6/1/2014, 12/1/2014 and 19/1/2014). These locations include 1) Area near Frank's Fuels, 2) Area west of Bean There Done That, 3) Area south of Hallowed Grounds, 4) Area south of Katerina's Cafe and 5) Area south-west of the Arkadious Park. These locations are not near most of the usual dining locations and some tend to be quite out of the way. Hence this has been raised as suspicious behavior.
+10) **Repeated visits to locations not near eateries**
 
+Hennie Osvaldo, Minke Mies, Inga Ferro and Loreto Bodrogi usually take turns visiting a selected few locations during the lunch break (except for 6/1/2014, 12/1/2014 and 19/1/2014). These locations include 1) Area near Frank's Fuels, 2) Area west of Bean There Done That, 3) Area south of Hallowed Grounds, 4) Area south of Katerina's Cafe and 5) Area south-west of the Arkadious Park. These locations are not near most of the usual dining locations and some tend to be quite out of the way. Hence this has been raised as suspicious behavior.
+
+11) **Suspicious transactions and activities at petrol stations**
+
+Given that there are relatively few records at gas stations (U-Pump and Frank's Fuels), we assume that GasTech provides free petrol for their employee cars. Scanning through the few records at gas stations, we note the following:
+    - Varja Lagos (Badging Office, CarID 23) made a transaction at U-Pump on 01/06/2014 at 1728.
+    - Nils Calixto (IT Helpdesk, CarID 1) made a transaction at U-Pump on 01/13/2014 at 1318.
+    - Loreto Bodrogi (Site Control, CarID 15) made a transaction at Frank's Fuel on 01/08/2014 at 1229.
+    - Felix Balas (Engineer, CarID 3) made a transaction at Frank's Fuel on 01/18/2014 at 1839.
+
+However, we noted that Nils Calixto GPS coordinates put him at an area near Albert's Fine Clothes instead of U-Pump when the credit card transaction was made.
+
+Furthermore, we noted that Minke Mies (Perimeter Control, CarID 24) did not have transactions recorded at U-Pump, but was in an area near U-Pump on 01/13/2014 from 1235 to 1322.
+
+Lastly, Bertrand Ovan (Facilities Group Manager, CarID29) drove around the city from 2211 till midnight on 01/11/2014, and stopped near U-Pump from 2325 to 2355 without related transactions.
+
+12) **Truck Schedules**
+
+We noted that for most days across the two weeks analyzed, trucks are usually not used after 1700, with the exception of the below:
+    - On 01/13/2014, CarID 101 made 2  trips around the lower half of Abila, finally ending at Gastech at 1857.
+    - On 01/13/2014, CarID 104 was returning from Abila Airport at 1711, arriving at Gastech at 1717. 
+    - On 01/15/2014, CarID 107 was departed Gastech for an area west of Maximum Iron and Steel arriving at 1727 and departed at 1813, arriving at Abila Hospital at 1825.
+    - On 01/17/2014, CarID 107 was departed Nationwide Refinery for Abila Port, arriving at 1716 and departed almost immediately back to Gastech, arriving at 1721.
+    - CarID 101, 104, 105 and 106 were operating till late from 1700 to 2106 on 01/16/2014. This is unusual given that trucks are usually not used after 1700.
+    
+13) **Unusual transactions at Kronos Mart**
+
+There are several transactions in Kronos Mart at 3am on 01/13/2014 and 01/19/2014. By filtering the map for 3am, we noted that there were no cars near Kronos Mart. Hence, these transactions are either incorrectly timed or may even be fraudulent. Furthermore, we noted that the related trajectories are in the day before the actual credit card transaction:
+    - On 01/12/2014, Orhan Strum (COO, CarID 32) made a transaction at 0339. Noted that his car trajectory puts him at Kronos Mart on 01/11/2014 at 1335 instead.
+    - On 01/13/2014, employee with credit card ending with 5407 made a transaction at 0300.
+    - On 01/19/2014, Varja Lagos (Badging Office, CarID 23) made a transaction at 0313. Noted that his car trajectory puts him at Kronos Mart on 01/18/2014 at 1348 instead.
+    - On 01/19/2014, Nils Calixto (IT Helpdesk, CarID 1) made a transaction at 0345. Noted that his car trajectory puts him at Kronos Mart on 01/18/2014 at 1336 instead.
+    - On 01/19/2014, Ada Campo-Corrente (CIO, CarID 10) made a transaction at 0348. Noted that his car trajectory puts him at Kronos Mart on 01/18/2014 at 1329 instead.
+    
 ```{r, layout="l-body-outset", fig.width=12, fig.height=5}
 DT::datatable(cc_data_cleaned_matched, extensions='Scroller', filter = "top", fillContainer = T, options = list(scrollX=TRUE, autoWidth=TRUE, scroller=TRUE, scrollY = '450px'))
 ```
 
+14) **Visits to Kronos Capitol**
 
+The following employees have made visits to Kronos Capitol over the two week period.
+    - On 01/11/2014, Willem Vasco-Pais (Environmental Safety Advisor, CarID 35) visited Kronos Capitol, arriving at 1401 and leaving at 1724.
+    - On 01/18/2014, Loreto Bodrogi (Site Control, CarID 15) visited Kronos Capitol, arriving at 1314 and leaving at 1513. He would have crossed paths with Edvard Vann (Perimeter Control, CarID 34) who arrived at Kronos Capitol at 1323 and left at 1821.
+    - On 01/18/2014, Adra Nubarron (Badging Office, CarID 22) and Isande Borrasca (Drill Technician, CarID 28) visited Kronos Capitol, arriving at 1012 and 1010 respectively. They left the Capitol at 1322 for Ahaggo Museum, arriving at 1331. They left the museum at 1842 for an area near Albert's Fine Clothes. At 2007, they left this area for an area near Guy's Gyros, arriving at 2018.
+    
+This is suspicious as the government sits at the Capitol and hence these employees might be liaising with the government on certain issues regarding environmental stewardship.
 
+15) **CarID 28 GPS trajectories**
 
+We noted that CarID 28 trajectories are chaotic. This car is being assigned to Isande Borrasca (Drill Technician). There may have been tampering made to the GPS tracking system.
 
-
+```{r}
+##Interactive map
+gps_path_selected <- gps_path_cleaned %>%
+  filter(id == 28)
+  
+tmap_mode("view")
+tm_shape(bgmap) +
+  tm_rgb(bgmap, r = 1, g = 2, b = 3, alpha = NA, saturation = 1, interpolate = TRUE, max.value = 255) +
+  tm_shape(gps_path_selected) +
+  tm_lines(col= "red")
+```
