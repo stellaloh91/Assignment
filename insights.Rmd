@@ -22,8 +22,7 @@ knitr::opts_chunk$set(fig.retina = 3,
                       echo = TRUE,
                       eval = TRUE,
                       message = FALSE,
-                      warning = FALSE,
-                      tidy.opts=list(width.cutoff=80),tidy=TRUE)
+                      warning = FALSE)
 ```
 
 ## Viz and Insights
@@ -545,7 +544,7 @@ By plotting the GPS coordinates using the Abila tourist map as background, we ar
 1) After mapping the GPS trajectories, We also noted that there were no GPS data indicating that any car stopped near "Bean There Done That", "Brewed Awakenings", "Coffee Shack" and "Jack's Magical Beans" during the period of transactions- 12:00pm. Hence, these transactions are either incorrectly timed or may even be fraudulent.
 
 ```{r, layout="l-body-outset", fig.width=6, fig.height=20}
-##Facet map
+##Interactive map
 gps_path_selected <- gps_path_cleaned %>%
   filter(hour == 12)
   
@@ -936,19 +935,14 @@ We have identified the following suspicious activities:
 
 Nils Calixto (IT Helpdesk) returned back to Gastech during late hours frequently. This is highly suspicious as the nature of his role does not seem to require returning to office during late nights when there are few employees at work. 
 
-From the facet graph below, we observe that he has returned to office during the period 2100-2400 on 08/01/2014, 15/01/2014 and 17/01/2014.
+From the facet graph below, we observe that he has returned to office during the period 2100-2400 on 01/06/2014, 01/08/2014, 01/15/2014 and 01/17/2014.
 
-Filtering the datatable below, we also observe that Nils Calixto has made several suspicious transactions on his credit card on 01/13/2014:
-    - Spent $10,000 at Frydos Autosupply n' More at 1920. This expenditure has been identified as an outlier during our exploratory analysis performed earlier. This further raises suspicions due to the large transaction amount. Furthermore, by tracking the car's movements throughout the day, we noted that the car was not at Frydos Autosupply n' More at this time.
-    - Made a purchase at U-Pump at 1318. However, we noted that Nils Calixto GPS coordinates put him at an area near Albert's Fine Clothes instead of U-Pump when the credit card transaction was made.
-    - Only person to have made a transaction at Daily Dealz at 0604. However, there were no GPS information during this time. As the vehicles are tracked as long as they are moving, one would assume that Nils Calixto did not drive to Daily Dealz to make the purchase.
-
-```{r, layout="l-body-outset", fig.width=6, fig.height=5}
+```{r, layout="l-body-outset", fig.width=8, fig.height=5, fig.cap="Facet graph of CarID 1 at time 2100-2400 by day"}
 ##Facet map- by day
 gps_path_selected <- gps_path_cleaned %>%
   filter(id == 1, timegroup == "21-24")
   
-tmap_mode("plot")
+tmap_mode("view")
 tm_shape(bgmap) +
   tm_rgb(bgmap, r = 1, g = 2, b = 3, alpha = NA, saturation = 1, interpolate = TRUE, max.value = 255) +
   tm_shape(gps_path_selected) +
@@ -956,13 +950,31 @@ tm_shape(bgmap) +
   tm_facets(by = "day", ncol = 3)
 ```
 
-```{r, layout="l-body-outset", fig.width=12, fig.height=10}
-DT::datatable(cc_data_cleaned_matched, extensions='Scroller', filter = "top", fillContainer = T, options = list(scrollX=TRUE, autoWidth=TRUE, scroller=TRUE, scrollY = '450px'))
+Filtering the datatable below, we also observe that Nils Calixto has made several suspicious transactions on his credit card on 01/13/2014:
+    - Spent $10,000 at Frydos Autosupply n' More at 1920. This expenditure has been identified as an outlier during our exploratory analysis performed earlier. This further raises suspicions due to the large transaction amount. Furthermore, by tracking the car's movements throughout the day, we noted that the car was not at Frydos Autosupply n' More at this time.
+    - Made a purchase at U-Pump at 1318 on 01/13/2014. However, we noted that Nils Calixto GPS coordinates put him at an area near Albert's Fine Clothes instead of U-Pump when the credit card transaction was made.
+    - Only person to have made a transaction at Daily Dealz at 0604. However, there were no GPS information during this time. As the vehicles are tracked as long as they are moving, one would assume that Nils Calixto did not drive to Daily Dealz to make the purchase.
+    
+```{r, layout="l-body-outset", fig.width=12, fig.height=10, fig.cap="Datatable of credit card transactions"}
+cc_data_cleaned_matched_DT <- subset(cc_data_cleaned_matched, select = -c(daynumber))
+DT::datatable(cc_data_cleaned_matched_DT, extensions='Scroller', filter = "top", fillContainer = T, options = list(scrollX=TRUE, autoWidth=TRUE, scroller=TRUE, scrollY = '450px'))
+```
+
+```{r, layout="l-body-outset", fig.width=6, fig.height=5, fig.cap="Interactive map of CarID 1 on day 13, timegroup 1300-1600"}
+##Plotting GPS paths- interactive map
+gps_path_selected <- gps_path_cleaned %>%
+  filter(id == 1, day == 13, timegroup == "13-16")
+
+tmap_mode("view")
+tm_shape(bgmap) +
+  tm_rgb(bgmap, r = 1, g = 2, b = 3, alpha = NA, saturation = 1, interpolate = TRUE, max.value = 255) +
+  tm_shape(gps_path_selected) +
+  tm_lines(col= "red")
 ```
 
 2) **Gathering of employees** 
 
-There seems to have been a gathering by certain employees on 10/1/2014 at till late. Employees only started leaving at around 2300. We filter for the day and hour and plotted a facet map. By tracing the employees route with the interactive facet map below, we noted that except for Isia Vann (Perimeter Control)(CarID 16), the other employees seem to leave the house in Carnero Street at around 2300 to return to their respective homes. We have excluded Isia Vann as the route is different from the others. We also noted that two other employees left the gathering later than the others- Felix Balas and Marin Onda. 
+There seems to have been a gathering by certain employees on 01/10/2014 till late. Employees only started leaving at around 2300. We filter for the day and hour and plotted a facet map. By tracing the employees route with the interactive facet map below, we noted that except for Isia Vann (Perimeter Control)(CarID 16) and Willem Vasco-Pais (Environmental Safety Advisor, CarID 35), the other employees seem to leave the house in Carnero Street at around 2300 to return to their respective homes. We have excluded Isia Vann and Willem Vasco-Pais as the route is different from the others. We also noted that two other employees left the gathering later than the others- Felix Balas and Marin Onda. 
 
 The employees who attended the gathering seem to be mainly from the Engineering and Information Technology department. We noted that this area seems to be Lars Azada's house and hence he may be the host. We have inferred that this is his house as by tracking the trajectories of his movement, we noted that he tends to return to this location during afterwork hours.
     - Nils Calixto (IT Helpdesk)- CarID 1
@@ -970,24 +982,24 @@ The employees who attended the gathering seem to be mainly from the Engineering 
     - Linnea Bergen (IT Group Manager)- CarID 6
     - Lucas Alcazar (IT Technician)- CarID 8
     - Lars Azada (Engineer)- CarID 2
+    - Elsa Orilla (Drill Technician)- CarID 7
     - Gustav Cazar (Drill Technician)- CarID 9
     - Axel Calzas (Hydraulic Technician)- CarID 11
     - Lidelse Dedos (Engineering Group Manager)- CarID 14
+    - Birgitta Frente (Geologist)- CarID 18
     - Vira Frente (Hydraulic Technician)- CarID 19
     - Kanon Herrero (Geologist)- CarID 25
-    - Elsa Orilla (Drill Technician)- CarID 7
-    - Birgitta Frente (Geologist)- CarID 18
     - Isande Borrasca (Drill Technician)- CarID 28
     - Brand Tempestad (Drill Technician)- CarID 33
     - Felix Balas (Engineer)- CarID 3 (left later at 11/1/2014 0000)
     - Marin Onda (Drill Site Manager)- CarID 26 (left later at 11/1/2014 0000)
     
-```{r, layout="l-body-outset", fig.width=6, fig.height=6}
+```{r, layout="l-body-outset", fig.width=12, fig.height=10, fig.cap="Facet graph of all cars moving at time 2200 - 2300 on day 10"}
 ##Facet map- by id
 gps_path_selected <- gps_path_cleaned %>%
-  filter(day == 10, hour == 23)
+  filter(day == 10, hour == 23 | hour == 22)
   
-tmap_mode("plot")
+tmap_mode("view")
 tm_shape(bgmap) +
   tm_rgb(bgmap, r = 1, g = 2, b = 3, alpha = NA, saturation = 1, interpolate = TRUE, max.value = 255) +
   tm_shape(gps_path_selected) +
@@ -995,7 +1007,7 @@ tm_shape(bgmap) +
   tm_facets(by = "id", ncol = 3)
 ```
 
-```{r, layout="l-body-outset", fig.width=6, fig.height=2}
+```{r, layout="l-body-outset", fig.width=6, fig.height=2, fig.cap="Facet graph of all cars moving at time 0000 on day 11"}
 ##Facet map- by id
 gps_path_selected <- gps_path_cleaned %>%
   filter(day == 11, hour == 00)
@@ -1008,9 +1020,11 @@ tm_shape(bgmap) +
   tm_facets(by = "id", ncol = 3)
 ```
 
-3) Isia Vann (Perimeter Control)(CarID 16) visited a house in Barwyn Street late on 01/10/2014 at 2300 and only left on 11/1/2014 at 0300. This seems to be a one-time occurrence throughout the two weeks.
+3) **Suspicious visit to a house late at night**
 
-```{r}
+Isia Vann (Perimeter Control)(CarID 16) visited a house in Barwyn Street late on 01/10/2014 at 2300 and only left on 01/11/2014 at 0300. This seems to be a one-time occurrence throughout the two weeks.
+
+```{r, fig.cap="Interactive graph of CarID16 at time 2300 on day 10"}
 ##Interactive map
 gps_path_selected <- gps_path_cleaned %>%
   filter(id == 16, day == 10, hour == 23)
@@ -1022,19 +1036,126 @@ tm_shape(bgmap) +
   tm_lines(col= "red")
 ```
 
+```{r, fig.cap="Interactive graph of CarID 16 at time 0300 on day 11"}
+##Interactive map
+gps_path_selected <- gps_path_cleaned %>%
+  filter(id == 16, day == 11, hour == 3)
+  
+tmap_mode("view")
+tm_shape(bgmap) +
+  tm_rgb(bgmap, r = 1, g = 2, b = 3, alpha = NA, saturation = 1, interpolate = TRUE, max.value = 255) +
+  tm_shape(gps_path_selected) +
+  tm_lines(col= "red")
+```
+
 4) **Monitoring of CIO's house at odd hours**
 
-The following employees have been visiting a similar location near Spetson Park late at night. On further investigation, this seems to be the Ada Campo-Corrente's (CIO) house. We have inferred that this is the CIO house as by tracking the trajectories of her movement, we noted that she tends to return to this location during afterwork hours.
+The following employees have been visiting a similar location near Spetson Park late at night. On further investigation, this seems to be the Ada Campo-Corrente's (CIO) house. We have inferred that this is the CIO house by tracking the trajectories of her movement. We noted that she tends to return to this location during afterwork hours.
     - Loreto Bodrogi (Site Control, CarID 15) visited an area near Spetson Park on 01/07/2014 at 0335, departing from his house at 0320. He only departed the area at 0729 and made a purchase at Brewed Awakenings before heading directly to Gastech. 
     - Isia Vann (Perimeter Control, CarID 16) also had a similar trajectory as Loreto Bodrogi. She left her house at 2301 on 01/06/2014 and arrived at the area near Spetson Park at 2309. She then remained in the same area and left only at 0730 and drove directly to Gastech without making any other stops. 
-    - Both Loreto and Isia's paths would have crossed on their trip to the area near Spetson Park on 07/01/2014. They also left around the same time. They both took the same route to Gastech although Loreto Bodrogi made a transaction at Brewed Awakenings.
-         
-5) Meeting at Taxiarchon Park at night between Loreto Bodrogi and Mies Minke 
-    - Loreto Bodrogi (Site Control, CarID 15) also visited Taxichorn Park on 09/01/2014 at 0332, departing from his house at 0320. He only departed the area at 0723 and stopped by Jack's Magical Beans before heading directly to Gastech.
-    - Minke Mies (Perimeter Control, CarID 24) also visited Taxichorn Park on 09/01/2014, departing from his house at 2300 and arriving at 2306. He only departed the area at 0330 and headed directly home, reaching at 0340.
+    - Both Loreto and Isia's paths would have crossed on their trip to the area near Spetson Park on 01/07/2014. They also left around the same time. They both took the same route to Gastech although Loreto Bodrogi made a transaction at Brewed Awakenings.
+
+```{r, fig.cap="Facet graph of CarID 10 at 1800 (afterwork hours)"}
+##Interactive map
+gps_path_selected <- gps_path_cleaned %>%
+  filter(id == 10, hour == 18)
+  
+tmap_mode("view")
+tm_shape(bgmap) +
+  tm_rgb(bgmap, r = 1, g = 2, b = 3, alpha = NA, saturation = 1, interpolate = TRUE, max.value = 255) +
+  tm_shape(gps_path_selected) +
+  tm_lines(col= "red") +
+  tm_facets(by = "day", ncol = 3)
+```
+
+```{r, fig.cap="Interactive graph of CarID 15 on 01/07/2014"}
+##Interactive map
+gps_path_selected <- gps_path_cleaned %>%
+  filter(id == 15, day == 7)
+  
+tmap_mode("view")
+tm_shape(bgmap) +
+  tm_rgb(bgmap, r = 1, g = 2, b = 3, alpha = NA, saturation = 1, interpolate = TRUE, max.value = 255) +
+  tm_shape(gps_path_selected) +
+  tm_lines(col= "red") 
+```
+
+```{r, fig.cap="Interactive graph of CarID 16 on 01/06/2014"}
+##Interactive map
+gps_path_selected <- gps_path_cleaned %>%
+  filter(id == 16, day == 6, hour == 23)
+  
+tmap_mode("view")
+tm_shape(bgmap) +
+  tm_rgb(bgmap, r = 1, g = 2, b = 3, alpha = NA, saturation = 1, interpolate = TRUE, max.value = 255) +
+  tm_shape(gps_path_selected) +
+  tm_lines(col= "red") 
+```
+
+5) **Monitoring of COO's house at odd hours**
+
+The following employees have been visiting a similar location near Taxichorn Park late at night. On further investigation, this seems to be the Orhan Strum's (COO) house. We have inferred that this is the COO house by tracking the trajectories of his movement. We noted that he tends to return to this location during afterwork hours.
+    - Loreto Bodrogi (Site Control, CarID 15) also visited an area near Taxichorn Park on 01/09/2014 at 0332, departing from his house at 0320. He only departed the area at 0723 and stopped by Jack's Magical Beans before heading directly to Gastech.
+    - Minke Mies (Perimeter Control, CarID 24) also visited Taxichorn Park on 01/09/2014, departing from his house at 2300 on 01/08/2014 and arriving at 2306. He only departed the area at 0330 and headed directly home, reaching at 0340.
     - Minke Mies left Taxichorn Park just as Loreto Bodrogi arrived. This is highly suspicious as they seem to be taking shifts for some kind of stakeout.
-    
-6) On 11/01/2014, Bertrand Ovan visited a sequence of places, without making any transactions. He left his house at 22:11, arriving at Brew've Been Served Cafe at 2212. After staying for 9 minutes, he went to the Ouzeri Elian, arriving at 2227. He then left at 2234 and headed for the place near Kronos Mart and arrived at 22:40. 15 minutes later, he went to the Alberts Fine Clothing arriving at 2258 and stayed there for another 23 minutes. He drove to an area near U-Pump or Jack Magic Beans, starting from 23:21 and arrived at the at 23:25. He stayed there for about 30 minutes, and arrived home at exactly 2359. This is quite unusual as he visited several locations without making any transactions. 
+
+```{r, fig.cap="Facet graph of CarID 32 at 1700-1800 (afterwork hours)"}
+##Interactive map
+gps_path_selected <- gps_path_cleaned %>%
+  filter(id == 32, hour == 18 | hour == 17)
+  
+tmap_mode("view")
+tm_shape(bgmap) +
+  tm_rgb(bgmap, r = 1, g = 2, b = 3, alpha = NA, saturation = 1, interpolate = TRUE, max.value = 255) +
+  tm_shape(gps_path_selected) +
+  tm_lines(col= "red") +
+  tm_facets(by = "day", ncol = 3)
+```
+
+```{r, fig.cap="Interactive graph of CarID 15 on 01/09/2014"}
+##Interactive map
+gps_path_selected <- gps_path_cleaned %>%
+  filter(id == 15, day == 9)
+  
+tmap_mode("view")
+tm_shape(bgmap) +
+  tm_rgb(bgmap, r = 1, g = 2, b = 3, alpha = NA, saturation = 1, interpolate = TRUE, max.value = 255) +
+  tm_shape(gps_path_selected) +
+  tm_lines(col= "red") 
+```
+
+```{r, fig.cap="Interactive graph of CarID 24 on 01/08/2014"}
+##Interactive map
+gps_path_selected <- gps_path_cleaned %>%
+  filter(id == 24, day == 8, hour == 23)
+  
+tmap_mode("view")
+tm_shape(bgmap) +
+  tm_rgb(bgmap, r = 1, g = 2, b = 3, alpha = NA, saturation = 1, interpolate = TRUE, max.value = 255) +
+  tm_shape(gps_path_selected) +
+  tm_lines(col= "red") 
+```
+
+6) **Driving around Abila without making any transactions**
+
+On 01/11/2014 night, Bertrand Ovan (Facilities Group Manager, CarID 29) visited a sequence of places, without making any transactions. He left his house at 22:11, arriving at Brew've Been Served Cafe at 2212. After staying for 9 minutes, he went to the Ouzeri Elian, arriving at 2227. He then left at 2234 and headed for the place near Kronos Mart and arrived at 22:40. 15 minutes later, he went to the Alberts Fine Clothing arriving at 2258 and stayed there for another 23 minutes. He drove to an area near U-Pump or Jack Magic Beans, starting from 2321 and arrived at the at 23:25. He stayed there for about 30 minutes, and arrived home at exactly 2359. This is quite unusual as he visited several locations without making any transactions. 
+
+```{r, fig.cap="Interactive graph of CarID 29 on 01/11/2014"}
+##Interactive map
+gps_path_selected <- gps_path_cleaned %>%
+  filter(id == 29, day == 11, timegroup == "21-24")
+  
+tmap_mode("view")
+tm_shape(bgmap) +
+  tm_rgb(bgmap, r = 1, g = 2, b = 3, alpha = NA, saturation = 1, interpolate = TRUE, max.value = 255) +
+  tm_shape(gps_path_selected) +
+  tm_lines(col= "red") 
+```
+
+```{r, layout="l-body-outset", fig.width=12, fig.height=10, fig.cap="Datatable of credit card transactions"}
+cc_data_cleaned_matched_DT <- subset(cc_data_cleaned_matched, select = -c(daynumber))
+DT::datatable(cc_data_cleaned_matched_DT, extensions='Scroller', filter = "top", fillContainer = T, options = list(scrollX=TRUE, autoWidth=TRUE, scroller=TRUE, scrollY = '450px'))
+```
 
 7) **Monitoring of CFO's house at odd hours**
 
@@ -1045,14 +1166,117 @@ The following employees have been visiting a similar location late at night. On 
     - Both Minke Mies and Hennies Osvaldo may have crossed paths on 01/14/2014 as they seem to only miss each other by a minute.
     - Both Isia Vann  and Hennies Osvaldo may have crossed paths on 01/11/2014 as they seem to only miss each other by a short period of time.
 
-8) Hennie Osvaldo's residences
+```{r, fig.cap="Facet graph of CarID 4 at 1700-1800 (afterwork hours)"}
+##Interactive map
+gps_path_selected <- gps_path_cleaned %>%
+  filter(id == 4, hour == 18 | hour == 17)
+  
+tmap_mode("view")
+tm_shape(bgmap) +
+  tm_rgb(bgmap, r = 1, g = 2, b = 3, alpha = NA, saturation = 1, interpolate = TRUE, max.value = 255) +
+  tm_shape(gps_path_selected) +
+  tm_lines(col= "red") +
+  tm_facets(by = "day", ncol = 3)
+```
 
-Hennies Osavado seems to own two residences- 1) Area next to Guy's Gyros, 2) Area near Frydo's Autosupply N'More. He typically returns to the second house on weekdays and the first house on weekends, with the exception of 01/08/2014.
+```{r, fig.cap="Interactive graph of CarID 16 on 01/10/2014, timegroup 2100-2400"}
+##Interactive map
+gps_path_selected <- gps_path_cleaned %>%
+  filter(id == 16, day == 10, timegroup == "21-24")
+  
+tmap_mode("view")
+tm_shape(bgmap) +
+  tm_rgb(bgmap, r = 1, g = 2, b = 3, alpha = NA, saturation = 1, interpolate = TRUE, max.value = 255) +
+  tm_shape(gps_path_selected) +
+  tm_lines(col= "red") 
+```
 
-```{r, layout="l-body-outset", fig.width=6, fig.height=4}
+```{r, fig.cap="Interactive graph of CarID 24 on 01/14/2014"}
+##Interactive map
+gps_path_selected <- gps_path_cleaned %>%
+  filter(id == 24, day == 14)
+  
+tmap_mode("view")
+tm_shape(bgmap) +
+  tm_rgb(bgmap, r = 1, g = 2, b = 3, alpha = NA, saturation = 1, interpolate = TRUE, max.value = 255) +
+  tm_shape(gps_path_selected) +
+  tm_lines(col= "red") 
+```
+
+```{r, fig.cap="Interactive graph of CarID 21 on 01/11/2014"}
+##Interactive map
+gps_path_selected <- gps_path_cleaned %>%
+  filter(id == 21, day == 11)
+  
+tmap_mode("view")
+tm_shape(bgmap) +
+  tm_rgb(bgmap, r = 1, g = 2, b = 3, alpha = NA, saturation = 1, interpolate = TRUE, max.value = 255) +
+  tm_shape(gps_path_selected) +
+  tm_lines(col= "red") 
+```
+
+```{r, fig.cap="Graph of CarID 21 on 01/13/2014 and 01/14/2014"}
+gps_path_selected1 <- gps_path_cleaned %>%
+  filter(id == 21, day == 13, hour == 23)
+  
+m1 <- tm_shape(bgmap) +
+  tm_rgb(bgmap, r = 1, g = 2, b = 3, alpha = NA, saturation = 1, interpolate = TRUE, max.value = 255) +
+  tm_shape(gps_path_selected1) +
+  tm_lines(col= "red") 
+
+gps_path_selected2 <- gps_path_cleaned %>%
+  filter(id == 21, day == 14, hour == 3)
+  
+m2 <- tm_shape(bgmap) +
+  tm_rgb(bgmap, r = 1, g = 2, b = 3, alpha = NA, saturation = 1, interpolate = TRUE, max.value = 255) +
+  tm_shape(gps_path_selected2) +
+  tm_lines(col= "red") 
+
+current.mode <- tmap_mode("view")
+tmap_arrange(m1,m2)
+tmap_mode(current.mode)
+```
+
+8) **Hennie Osvaldo's multiple residences**
+
+Hennie Osavado seems to own two residences- 1) Area next to Guy's Gyros, 2) Area near Frydo's Autosupply N'More. He typically returns to the second house on weekdays and the first house on weekends, with the exception of 01/08/2014 and 01/15/2014.
+
+```{r, layout="l-body-outset", fig.width=6, fig.height=4, fig.cap="Facet graph of CarID 21 on from 1700-2400"}
 ##Facet map- by day
 gps_path_selected <- gps_path_cleaned %>%
-  filter(id == 21, timegroup == "21-24")
+  filter(id == 21, timegroup == "21-24"| timegroup == "17-20")
+  
+tmap_mode("view")
+tm_shape(bgmap) +
+  tm_rgb(bgmap, r = 1, g = 2, b = 3, alpha = NA, saturation = 1, interpolate = TRUE, max.value = 255) +
+  tm_shape(gps_path_selected) +
+  tm_lines(col = "red") +
+  tm_facets(by = "day", ncol = 3)
+```
+
+9) **Potential relationship between Elsa Orilla and Brand Tempestad**
+
+As discussed above, we also noted that Elsa Orilla (Drill Technician, CarID 7) and Brand Tempestad (Drill Technician, carID 33) frequently visited Chostus Hotel on weekdays during lunch hour, up to four times over the two weeks observed (01/08/2014, 01/10/2014, 01/14/2014, 01/17/2014). This can be seen from their credit card transactions using the datatable below.
+
+On further investigation, there are two employees with last name Orilla. We do not have further information on whether there is a relationship between them. However if they are partners, this may present as an illicit relationship given that it occurs frequently during lunch hours on weekdays when Kare Orilla is having lunch elsewhere. We also noticed that both parties tend to stagger their departure time from the location for about 10 minutes.
+
+```{r, layout="l-body-outset", fig.width=6, fig.height=7, fig.cap="Facet graph of CarID 21 during 1200-1400"}
+##Facet map- by id
+gps_path_selected <- gps_path_cleaned %>%
+  filter(id == 7, hour == 12| hour == 13| hour == 14)
+  
+tmap_mode("view")
+tm_shape(bgmap) +
+  tm_rgb(bgmap, r = 1, g = 2, b = 3, alpha = NA, saturation = 1, interpolate = TRUE, max.value = 255) +
+  tm_shape(gps_path_selected) +
+  tm_lines(col = "red") +
+  tm_facets(by = "day", ncol = 3)
+```
+
+```{r, layout="l-body-outset", fig.width=6, fig.height=7, fig.cap="Facet graph of CarID 33 during 1200-1400"}
+##Facet map- by id
+gps_path_selected <- gps_path_cleaned %>%
+  filter(id == 33, hour == 12| hour == 13| hour == 14)
   
 tmap_mode("plot")
 tm_shape(bgmap) +
@@ -1062,40 +1286,27 @@ tm_shape(bgmap) +
   tm_facets(by = "day", ncol = 3)
 ```
 
-9) Potential relationship between Elsa Orilla and Brand Tempestad
-
-As discussed above, we also noted that Elsa Orilla (Drill Technician) and Brand Tempestad (Drill Technician)
-frequently visired Chostus Hotel on weekdays during lunch hour, up to four times over the two weeks observed. On further investigation, there are two employees with last name Orilla. We do not have further information on whether there is a relationship between them. However if they are partners, this may present as an illicit relationship given that it occurs frequently during lunch hours on weekdays when Kare Orilla is having lunch elsewhere. We also noticed that both parties tend to stagger their departure time from the location for about 10 minutes.
-
-```{r, layout="l-body-outset", fig.width=6, fig.height=7}
-##Facet map- by id
-gps_path_selected <- gps_path_cleaned %>%
-  filter(id == 7, timegroup == "8-12")
-  
-tmap_mode("plot")
-tm_shape(bgmap) +
-  tm_rgb(bgmap, r = 1, g = 2, b = 3, alpha = NA, saturation = 1, interpolate = TRUE, max.value = 255) +
-  tm_shape(gps_path_selected) +
-  tm_lines(col = "red") +
-  tm_facets(by = "day", ncol = 3)
-```
-
-```{r, layout="l-body-outset", fig.width=6, fig.height=7}
-##Facet map- by id
-gps_path_selected <- gps_path_cleaned %>%
-  filter(id == 7, timegroup == "13-16")
-  
-tmap_mode("plot")
-tm_shape(bgmap) +
-  tm_rgb(bgmap, r = 1, g = 2, b = 3, alpha = NA, saturation = 1, interpolate = TRUE, max.value = 255) +
-  tm_shape(gps_path_selected) +
-  tm_lines(col = "red") +
-  tm_facets(by = "day", ncol = 3)
+```{r, layout="l-body-outset", fig.width=12, fig.height=10, fig.cap="Datatable of credit card transactions"}
+cc_data_cleaned_matched_DT <- subset(cc_data_cleaned_matched, select = -c(daynumber))
+DT::datatable(cc_data_cleaned_matched_DT, extensions='Scroller', filter = "top", fillContainer = T, options = list(scrollX=TRUE, autoWidth=TRUE, scroller=TRUE, scrollY = '450px'))
 ```
 
 10) **Repeated visits to locations not near eateries**
 
-Hennie Osvaldo, Minke Mies, Inga Ferro and Loreto Bodrogi usually take turns visiting a selected few locations during the lunch break (except for 6/1/2014, 12/1/2014 and 19/1/2014). These locations include 1) Area near Frank's Fuels, 2) Area west of Bean There Done That, 3) Area south of Hallowed Grounds, 4) Area south of Katerina's Cafe and 5) Area south-west of the Arkadious Park. These locations are not near most of the usual dining locations and some tend to be quite out of the way. Hence this has been raised as suspicious behavior.
+Hennie Osvaldo (Perimeter Control, CarID 21), Minke Mies (Perimeter Control, CarID 24), Inga Ferro (Site Control, CarID 13) and Loreto Bodrogi (Site Control, CarID 15) usually take turns visiting a selected few locations during the lunch break (except for 01/06/2014, 01/12/2014 and 01/19/2014). These locations include 1) Area near Frank's Fuels, 2) Area west of Bean There Done That, 3) Area south of Hallowed Grounds, 4) Area south of Katerina's Cafe and 5) Area south-west of the Arkadious Park. These locations are not near most of the usual dining locations and some tend to be quite out of the way. Hence this has been raised as suspicious behavior.
+
+```{r, layout="l-body-outset", fig.width=6, fig.height=7, fig.cap="Facet graph of the various car trajectories during 1200-1300"}
+##Facet map- by id
+gps_path_selected <- gps_path_cleaned %>%
+  filter(id == 21 | id == 24 | id == 13 | id == 15, hour == 12 | hour == 13)
+  
+tmap_mode("view")
+tm_shape(bgmap) +
+  tm_rgb(bgmap, r = 1, g = 2, b = 3, alpha = NA, saturation = 1, interpolate = TRUE, max.value = 255) +
+  tm_shape(gps_path_selected) +
+  tm_lines(col = "red") +
+  tm_facets(by = "day", ncol = 3)
+```
 
 11) **Suspicious transactions and activities at petrol stations**
 
@@ -1105,11 +1316,52 @@ Given that there are relatively few records at gas stations (U-Pump and Frank's 
     - Loreto Bodrogi (Site Control, CarID 15) made a transaction at Frank's Fuel on 01/08/2014 at 1229.
     - Felix Balas (Engineer, CarID 3) made a transaction at Frank's Fuel on 01/18/2014 at 1839.
 
-However, we noted that Nils Calixto GPS coordinates put him at an area near Albert's Fine Clothes instead of U-Pump when the credit card transaction was made.
+However, we noted that Nils Calixto (CarID 1) GPS coordinates put him at an area near Albert's Fine Clothes instead of U-Pump when the credit card transaction was made.
 
 Furthermore, we noted that Minke Mies (Perimeter Control, CarID 24) did not have transactions recorded at U-Pump, but was in an area near U-Pump on 01/13/2014 from 1235 to 1322.
 
 Lastly, Bertrand Ovan (Facilities Group Manager, CarID29) drove around the city from 2211 till midnight on 01/11/2014, and stopped near U-Pump from 2325 to 2355 without related transactions.
+
+```{r, layout="l-body-outset", fig.width=12, fig.height=10, fig.cap="Datatable of credit card transactions"}
+cc_data_cleaned_matched_DT <- subset(cc_data_cleaned_matched, select = -c(daynumber))
+DT::datatable(cc_data_cleaned_matched_DT, extensions='Scroller', filter = "top", fillContainer = T, options = list(scrollX=TRUE, autoWidth=TRUE, scroller=TRUE, scrollY = '450px'))
+```
+
+```{r, fig.cap="Interactive graph of CarID 1 on 01/13/2014 at 1300"}
+##Interactive map
+gps_path_selected <- gps_path_cleaned %>%
+  filter(id == 1, day == 13, hour == 13)
+  
+tmap_mode("view")
+tm_shape(bgmap) +
+  tm_rgb(bgmap, r = 1, g = 2, b = 3, alpha = NA, saturation = 1, interpolate = TRUE, max.value = 255) +
+  tm_shape(gps_path_selected) +
+  tm_lines(col= "red") 
+```
+
+```{r, fig.cap="Interactive graph of CarID 24 on 01/13/2014 at 1200- 1300"}
+##Interactive map
+gps_path_selected <- gps_path_cleaned %>%
+  filter(id == 24, day == 13, hour == 12 | hour == 13)
+  
+tmap_mode("view")
+tm_shape(bgmap) +
+  tm_rgb(bgmap, r = 1, g = 2, b = 3, alpha = NA, saturation = 1, interpolate = TRUE, max.value = 255) +
+  tm_shape(gps_path_selected) +
+  tm_lines(col= "red") 
+```
+
+```{r, fig.cap="Interactive graph of CarID 29 on 01/11/2014 at 2200- 2400"}
+##Interactive map
+gps_path_selected <- gps_path_cleaned %>%
+  filter(id == 29, day == 11, hour == 22 | hour == 23)
+  
+tmap_mode("view")
+tm_shape(bgmap) +
+  tm_rgb(bgmap, r = 1, g = 2, b = 3, alpha = NA, saturation = 1, interpolate = TRUE, max.value = 255) +
+  tm_shape(gps_path_selected) +
+  tm_lines(col= "red") 
+```
 
 12) **Truck Schedules**
 
@@ -1119,18 +1371,83 @@ We noted that for most days across the two weeks analyzed, trucks are usually no
     - On 01/15/2014, CarID 107 was departed Gastech for an area west of Maximum Iron and Steel arriving at 1727 and departed at 1813, arriving at Abila Hospital at 1825.
     - On 01/17/2014, CarID 107 was departed Nationwide Refinery for Abila Port, arriving at 1716 and departed almost immediately back to Gastech, arriving at 1721.
     - CarID 101, 104, 105 and 106 were operating till late from 1700 to 2106 on 01/16/2014. This is unusual given that trucks are usually not used after 1700.
-    
+
+```{r, layout="l-body-outset", fig.width=6, fig.height=7, fig.cap="Facet graph of the various truck trajectories during 1700-2359"}
+##Facet map- by day
+gps_path_selected <- gps_path_cleaned %>%
+  filter(id == 101 | id == 104 | id == 105 | id == 106 | id == 107, timegroup == "17-20" | timegroup == "21-24")
+  
+tmap_mode("view")
+tm_shape(bgmap) +
+  tm_rgb(bgmap, r = 1, g = 2, b = 3, alpha = NA, saturation = 1, interpolate = TRUE, max.value = 255) +
+  tm_shape(gps_path_selected) +
+  tm_lines(col = "red") +
+  tm_facets(by = "day", ncol = 3)
+```
+
 13) **Unusual transactions at Kronos Mart**
 
-There are several transactions in Kronos Mart at 3am on 01/13/2014 and 01/19/2014. By filtering the map for 3am, we noted that there were no cars near Kronos Mart. Hence, these transactions are either incorrectly timed or may even be fraudulent. Furthermore, we noted that the related trajectories are in the day before the actual credit card transaction:
+There are several transactions in Kronos Mart at 3am on 01/13/2014 and 01/19/2014, as seen from the datatable. By filtering the map for 3am, we noted that there were no cars near Kronos Mart. Hence, these transactions are either incorrectly timed or may even be fraudulent. Furthermore, we noted that the related trajectories are in the day before the actual credit card transaction:
     - On 01/12/2014, Orhan Strum (COO, CarID 32) made a transaction at 0339. Noted that his car trajectory puts him at Kronos Mart on 01/11/2014 at 1335 instead.
-    - On 01/13/2014, employee with credit card ending with 5407 made a transaction at 0300.
+    - On 01/13/2014, employee with credit card ending with 5407 made a transaction at 0300. As we have been unable to match this card to any car trajectories, no further analysis is performed for this transaction.
     - On 01/19/2014, Varja Lagos (Badging Office, CarID 23) made a transaction at 0313. Noted that his car trajectory puts him at Kronos Mart on 01/18/2014 at 1348 instead.
     - On 01/19/2014, Nils Calixto (IT Helpdesk, CarID 1) made a transaction at 0345. Noted that his car trajectory puts him at Kronos Mart on 01/18/2014 at 1336 instead.
     - On 01/19/2014, Ada Campo-Corrente (CIO, CarID 10) made a transaction at 0348. Noted that his car trajectory puts him at Kronos Mart on 01/18/2014 at 1329 instead.
     
 ```{r, layout="l-body-outset", fig.width=12, fig.height=5}
 DT::datatable(cc_data_cleaned_matched, extensions='Scroller', filter = "top", fillContainer = T, options = list(scrollX=TRUE, autoWidth=TRUE, scroller=TRUE, scrollY = '450px'))
+```
+
+```{r, layout="l-body-outset", fig.width=6, fig.height=7, fig.cap="Facet graph of CarID 32"}
+##Facet map- by day
+gps_path_selected <- gps_path_cleaned %>%
+  filter(id == 32,  day == 11 | day == 12)
+  
+tmap_mode("view")
+tm_shape(bgmap) +
+  tm_rgb(bgmap, r = 1, g = 2, b = 3, alpha = NA, saturation = 1, interpolate = TRUE, max.value = 255) +
+  tm_shape(gps_path_selected) +
+  tm_lines(col = "red") +
+  tm_facets(by = "day", ncol = 3)
+```
+
+```{r, layout="l-body-outset", fig.width=6, fig.height=7, fig.cap="Facet graph of CarID 23"}
+##Facet map- by day
+gps_path_selected <- gps_path_cleaned %>%
+  filter(id == 23,  day == 18 | day == 19)
+  
+tmap_mode("view")
+tm_shape(bgmap) +
+  tm_rgb(bgmap, r = 1, g = 2, b = 3, alpha = NA, saturation = 1, interpolate = TRUE, max.value = 255) +
+  tm_shape(gps_path_selected) +
+  tm_lines(col = "red") +
+  tm_facets(by = "day", ncol = 3)
+```
+
+```{r, layout="l-body-outset", fig.width=6, fig.height=7, fig.cap="Facet graph of CarID 1"}
+##Facet map- by day
+gps_path_selected <- gps_path_cleaned %>%
+  filter(id == 1,  day == 18 | day == 19)
+  
+tmap_mode("view")
+tm_shape(bgmap) +
+  tm_rgb(bgmap, r = 1, g = 2, b = 3, alpha = NA, saturation = 1, interpolate = TRUE, max.value = 255) +
+  tm_shape(gps_path_selected) +
+  tm_lines(col = "red") +
+  tm_facets(by = "day", ncol = 3)
+```
+
+```{r, layout="l-body-outset", fig.width=6, fig.height=7, fig.cap="Facet graph of CarID 10"}
+##Facet map- by day
+gps_path_selected <- gps_path_cleaned %>%
+  filter(id == 10,  day == 18 | day == 19)
+  
+tmap_mode("view")
+tm_shape(bgmap) +
+  tm_rgb(bgmap, r = 1, g = 2, b = 3, alpha = NA, saturation = 1, interpolate = TRUE, max.value = 255) +
+  tm_shape(gps_path_selected) +
+  tm_lines(col = "red") +
+  tm_facets(by = "day", ncol = 3)
 ```
 
 14) **Visits to Kronos Capitol**
@@ -1141,6 +1458,31 @@ The following employees have made visits to Kronos Capitol over the two week per
     - On 01/18/2014, Adra Nubarron (Badging Office, CarID 22) and Isande Borrasca (Drill Technician, CarID 28) visited Kronos Capitol, arriving at 1012 and 1010 respectively. They left the Capitol at 1322 for Ahaggo Museum, arriving at 1331. They left the museum at 1842 for an area near Albert's Fine Clothes. At 2007, they left this area for an area near Guy's Gyros, arriving at 2018.
     
 This is suspicious as the government sits at the Capitol and hence these employees might be liaising with the government on certain issues regarding environmental stewardship.
+
+```{r, fig.cap="Interactive graph of CarID 35 on 01/11/2014 at 1300- 1959"}
+##Interactive map
+gps_path_selected <- gps_path_cleaned %>%
+  filter(id == 35, day == 11, timegroup == "13-16" | timegroup == "17-20")
+  
+tmap_mode("view")
+tm_shape(bgmap) +
+  tm_rgb(bgmap, r = 1, g = 2, b = 3, alpha = NA, saturation = 1, interpolate = TRUE, max.value = 255) +
+  tm_shape(gps_path_selected) +
+  tm_lines(col= "red") 
+```
+
+```{r, fig.cap="Interactive graph of various car trajectories on 01/18/2014"}
+##Interactive map
+gps_path_selected <- gps_path_cleaned %>%
+  filter(id == 15 | id == 34 | id == 22 | id == 28, day == 18)
+  
+tmap_mode("view")
+tm_shape(bgmap) +
+  tm_rgb(bgmap, r = 1, g = 2, b = 3, alpha = NA, saturation = 1, interpolate = TRUE, max.value = 255) +
+  tm_shape(gps_path_selected) +
+  tm_lines(col= "red") +
+  tm_facets(by = "id", ncol = 3)
+```
 
 15) **CarID 28 GPS trajectories**
 
@@ -1156,4 +1498,59 @@ tm_shape(bgmap) +
   tm_rgb(bgmap, r = 1, g = 2, b = 3, alpha = NA, saturation = 1, interpolate = TRUE, max.value = 255) +
   tm_shape(gps_path_selected) +
   tm_lines(col= "red")
+```
+
+16) **Gathering at Desafio Golf Course**
+
+Several of the executives were congregated at the Desafio Golf Course on Sundays. Willem Vasco-Pais (Environmental Safety Advisor, CarID 35), Ingrid Barranco (SVP/CFO, CarID 4) and Ada Camp-Corrente (SVP/CIO, CarID 10) were present on 12/1/2014 at 1300-1400 and 19/1/2014 at 1200-1500. Sten Sanjorge Jr (President/CEO, CarID 31) and Orhan Strum (SVP/COO, CarID 32) joining during the second session.
+
+We also noted that Sten Sanjorge Jr (President/CEO) seems to not be in Abila for most of the two weeks observed (hence missing the first golf gathering with the other executives) as his GPS records only start from 01/17/2014 to 01/19/2014. On his return, he seems to be staying at Chostus Hotel. We have inferred this by tracking the trajectories of his movement, we noted that he tends to return to the hotel during afterwork hours. This is unusual as Sten Sanjorge Jr does not seem to have a home in Abila.
+
+```{r, fig.cap="Interactive graph of various executives' car trajectories on 01/12/2014, 1200-1459"}
+##Interactive map
+gps_path_selected <- gps_path_cleaned %>%
+  filter(id == 35 | id == 4 | id == 10 , day == 12, hour == 12 | hour == 13 | hour == 14)
+  
+tmap_mode("view")
+tm_shape(bgmap) +
+  tm_rgb(bgmap, r = 1, g = 2, b = 3, alpha = NA, saturation = 1, interpolate = TRUE, max.value = 255) +
+  tm_shape(gps_path_selected) +
+  tm_lines(col= "red") +
+  tm_facets(by = "id", ncol = 3)
+```
+
+```{r, fig.cap="Interactive graph of various executives' car trajectories on 01/19/2014, 1200-1359"}
+##Interactive map
+gps_path_selected <- gps_path_cleaned %>%
+  filter(id == 35 | id == 4 | id == 10 | id == 32 | id == 31, day == 19, hour == 12 | hour == 13)
+  
+tmap_mode("view")
+tm_shape(bgmap) +
+  tm_rgb(bgmap, r = 1, g = 2, b = 3, alpha = NA, saturation = 1, interpolate = TRUE, max.value = 255) +
+  tm_shape(gps_path_selected) +
+  tm_lines(col= "red") +
+  tm_facets(by = "id", ncol = 3)
+```
+
+```{r, fig.cap="Interactive graph of CarID 31"}
+##Interactive map
+gps_path_selected <- gps_path_cleaned %>%
+  filter(id == 31)
+  
+tmap_mode("view")
+tm_shape(bgmap) +
+  tm_rgb(bgmap, r = 1, g = 2, b = 3, alpha = NA, saturation = 1, interpolate = TRUE, max.value = 255) +
+  tm_shape(gps_path_selected) +
+  tm_lines(col= "red") +
+  tm_facets(by = "day", ncol = 3)
+```
+
+17) **Usage of trucks for personal use**
+
+We noted several transactions by truck drivers in eateries, which we assume are categorized as personal business. According to Gastech's regulations, trucks cannot be used for personal business. The following transactions were made by errant truck drivers and deemed for personal use:
+    - On 01/13/2014, credit card ended with 9220 (tagged to CarID 101) was used in Ouzeri Elian at 1255.
+    - On 01/07/2014 to 01/09/2014 and 01/14/2014 to 01/16/2014, credit card ended with 7792 (tagged to CarID 105) was used in Katerina's Cafe between 1308-1323.
+    
+```{r, layout="l-body-outset", fig.width=12, fig.height=5}
+DT::datatable(cc_data_cleaned_matched, extensions='Scroller', filter = "top", fillContainer = T, options = list(scrollX=TRUE, autoWidth=TRUE, scroller=TRUE, scrollY = '450px'))
 ```

@@ -1,0 +1,42 @@
+---
+title: "Limitations"
+description: |
+  Details the limitations of using solely RMarkdown
+output: distill::distill_article
+---
+<style>
+
+body{
+  background-color: #EBEDEF;
+  font-family:helvetica;
+}
+</style>
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+### Limitations noted
+
+We have noted the following limitations in performing the analysis using solely RMarkdown:
+
+1) 
+
+2) Crosstalk is currently not compatible with visNetwork, an R package for interactive network visualization, Hence, on selecting a location in the network graph, we will have to manually filter a datatable for the location to observe the time each employee visits this location.
+
+### Next steps
+
+Given the limitations noted above, we will be incorporating RShiny to enhance the interactivity of the visualizations.
+
+Some benefits of RShiny include:
+
+1) End users need not be adept in programming langauges to be able to utilize the interactivity of the applications and modify the desired criteria for data visualization.
+
+2) Allows one to build and share highly interactive web-enabled applications without having to invest significant
+time and effort to master core web design.[(tskam, 2021)]( technology(https://isss608.netlify.app/lesson/lesson11/lesson11-intro_shiny#1).
+
+3) Allows one to integrate the analytical and visualisation packages of R without having to change from one programming language to another.[(tskam, 2021)]( technology(https://isss608.netlify.app/lesson/lesson11/lesson11-intro_shiny#1).
+
+
+
+

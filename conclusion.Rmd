@@ -1,0 +1,68 @@
+---
+title: "Conclusion"
+description: |
+  Final Thoughts
+output: distill::distill_article
+---
+<style>
+
+body{
+  background-color: #EBEDEF;
+  font-family:helvetica;
+}
+</style>
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(fig.retina = 3,
+                      echo = TRUE,
+                      eval = TRUE,
+                      message = FALSE,
+                      warning = FALSE)
+```
+
+### Assessment of suspicious activities identified
+
+We have compiled an overview of the suspicious activities identified, together with an assessment on their relative priorities.
+
+**ID**    |   **Event**                                   |   **Priority**    | **Employee Involved**
+--------------------------------------------------------------------------------------------------------------------
+1         |Unusual transactions and frequent overtime     | High              | Nils Calixto
+2         |Gathering of employees                         | Low               | Multiple employees at gathering
+3         |Suspicious visit to a house late at night      | Medium            | Isia Vann
+4         |Monitoring of CIO's house at odd hours         | High              | Loreto Bodrogi, Isia Vann
+5         |Monitoring of COO's house at odd hours         | High              | Loreto Bodrogi, Minke Mies
+6         |Driving around Abila without making any transactions| Medium       | Bertrand Ovan
+7         |Monitoring of CFO's house at odd hours         | High              | Isia Vann, Mike Mies, Hennie Osvaldo
+8         |Hennie Osvaldo's multiple residences           | Low               | Hennie Osvaldo
+9         |Potential relationship between Elsa Orilla and Brand Tempestad | Low   | Elsa Orilla, Brand Tempestad
+10        |Repeated visits to locations not near eateries | High              | Loreto Bodrogi, Mike Mies, Hennie Osvaldo, Inga Ferro
+11        |Suspicious transactions and activities at petrol stations | High   | Varja Lagos, Nils Calixto, Loreto Bodrogi, Felix Balas, Minke Mies, Bertrand Ovan
+12        |Truck Schedules                                | Medium            | All truck drivers
+13        |Unusual transactions at Kronos Mart            | Medium            | Orhan Strum, Varja Lagos, Nils Calixto, Ada Campo-Corrente
+14        |Visits to Kronos Capitol                       | Low               | Willem Vasco-Pais, Loreto Bodrogi, Edvard Vann, Adra Nubarron, Isande Borrasca
+15        |CarID 28 GPS trajectories                      | Low               | Isande Borrasca
+16        |Gathering at Desafio Golf Course               | Low               | Willem Vasco-Pais, Ingrid Barranco, Ada Camp-Corrente, Sten Sanjorge Jr, Orhan Strum
+17        |Usage of trucks for personal use               | Low               | Truck driver who checked out CarID 101 and 105 during the assigned times
+
+### Rationale and next steps
+
+Further investigation should be made into the employees involved in the high priority suspicious activities as detailed above. The below details the rationale on assessing these activities as high priorities.
+
+**Unusual transactions and frequent overtime **
+
+Nils Calixto's works as an IT Helpdesk in Gastech. He frequently returns to Gastech during late hours although the nature of his role does not seem to require returning to office during late nights when there are few employees at work. Furthermore, he is also involved in a few other suspicious activities as detailed above.
+
+**Monitoring of CIO's house at odd hours, Monitoring of COO's house at odd hours, Monitoring of CFO's house at odd hours**
+
+This is highly suspicious as it seems like a stakeout late at night involving similar groups of employees. These employees are also involved in several other suspicious activities described above.
+Monitoring of COO's house at odd hours
+
+**Repeated visits to locations not near eateries**
+
+This involves the same group of people who were monitoring the executives' homes (with the assition of Inga Ferro). Hence this adds on to te suspicion that they are planning something.
+
+**Suspicious transactions and activities at petrol stations**
+
+We have assumed that GasTech provides free petrol for their employee cars. Hence there is no need for employees to separately puchase petrol. Furthermore, we noted that some of the employees have made stops at the gas stations but did not make any transactions here. Also, Nils Calixto's location data put him at an area near Albert's Fine Clothes instead of U-Pump when the credit card transaction was made. There is a possibility his card may have been stolen to make this transaction.
+
+Given that some of the employees involved in suspicious activities here is also involved in other suspicious activities as detailed above, we are of the opinion that further investigation should be made to the transactions and stops at the gas stations.

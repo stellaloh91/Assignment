@@ -14,7 +14,9 @@ navbar:
     - text: "Insights"
       href: insights.html
     - text: "Conclusion"
-      href: conclusion.html      
+      href: conclusion.html
+    - text: "Limitations"
+      href: limitations.html  
   right:
     - text: "Home"
       href: index.html
