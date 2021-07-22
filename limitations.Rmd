@@ -2,7 +2,12 @@
 title: "Limitations"
 description: |
   Details the limitations of using solely RMarkdown
-output: distill::distill_article
+output: 
+  distill::distill_article:
+    toc: true
+    toc_float: true
+    toc_depth: 3
+    self_contained: false
 ---
 <style>
 
@@ -20,9 +25,9 @@ knitr::opts_chunk$set(echo = FALSE)
 
 We have noted the following limitations in performing the analysis using solely RMarkdown:
 
-1) 
+1) Users will have to manually update the code to produce graphs of different CarIDs to observe their trajectories. This may be difficult for users who have no coding experience.
 
-2) Crosstalk is currently not compatible with visNetwork, an R package for interactive network visualization, Hence, on selecting a location in the network graph, we will have to manually filter a datatable for the location to observe the time each employee visits this location.
+2) Crosstalk is currently not compatible with visNetwork, an R package for interactive network visualization, Hence, on selecting a location in the network graph, we will have to manually filter a datatable for the location to observe the time each employee visits this location, in order to determine whether employees have crossed paths at this location.
 
 ### Next steps
 

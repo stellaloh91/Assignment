@@ -49,7 +49,7 @@ Based on the interactive charts, we noted that the top 3 most popular locations 
 2) Hippokampos- Most popular on 01/16/2014  with 17 transactions, followed by 01/06/2014 (16), and 01/09/2014 with 14 transactions.
 3) Guy's Gyros- Most popular on 01/09/2014 and 01/13/2014 with 15 transactions, followed by 01/10/2014 and 01/17/2014 with 14 transactions each day, and 01/15/2014 and 01/16/2014 (13) being the third most popular days by transaction volume.
 
-```{r, layout="l-body-outset", fig.width=5.5, fig.height=5}
+```{r, tidy.opts=list(width.cutoff=55),tidy=TRUE, layout="l-body-outset", fig.width=5.5, fig.height=5}
 ##Volume from loyalty card dataset by date- linked
 
 shared_data <- SharedData$new(loyalty_data_cleaned, key = ~location)
@@ -79,7 +79,7 @@ loyalty_loc_vol_line <- shared_data %>%
 bscols(widths = c(14,14), loyalty_loc_vol_bar, loyalty_loc_vol_line)
 ```
 
-```{r, layout="l-body-outset", fig.width=5.5, fig.height=5}
+```{r, tidy.opts=list(width.cutoff=55),tidy=TRUE, layout="l-body-outset", fig.width=5.5, fig.height=5}
 ##Volume from credit card dataset by date- linked
 
 shared_data_cc <- SharedData$new(cc_data_cleaned, key = ~location)
@@ -116,7 +116,7 @@ Some of the notable differences observed include:
 2) Katerina's Cafe- Credit card volume exceeded loyalty card volume by 5 transactions on 01/18/2014
 3) Brew've Been Served- Credit card volume exceeded loyalty card volume by 4 transactions on 01/09/2014
 
-```{r, layout="l-body-outset", fig.width=7.5, fig.height=5.5}
+```{r, tidy.opts=list(width.cutoff=55),tidy=TRUE, layout="l-body-outset", fig.width=7.5, fig.height=5.5}
 ##Difference in volume by day
 
 loyalty_data_count <- loyalty_data_cleaned %>%
@@ -162,7 +162,7 @@ We will then analyze the transaction volume by day of week to observe volume tre
 2) Hippokampos- Most popular on Mondays with 26 transactions, followed by Wednesdays and Thursdays (25) and Fridays (22).
 3) Guy's Gyros- Most popular on Mondays and Thursdays with 26 transactions, followed by Fridays (25) and Wednesdays (23).
 
-```{r, layout="l-body-outset", fig.width=8.5, fig.height=8}
+```{r, tidy.opts=list(width.cutoff=55),tidy=TRUE, layout="l-body-outset", fig.width=8.5, fig.height=8}
 ##Loyalty card volume by day of week
 
 ##Preparing the data
@@ -204,7 +204,7 @@ Given that we are provided with credit card timestamp information, we will take 
 2) Hippokampos- Most popular on Thursdays with 31 transactions, followed by Mondays (28) and Wednesdays (27). Usually popular around lunch time (1300-1600), except for weekends where it is more popular during dinner hours (1700-2000).
 3) Guy's Gyros- Most popular on Thursdays and Fridays with 28 transactions, followed by Mondays (26) and Tuesdays and Wednesdays (25). Usually popular around dinner time (1700-2000), except for Fridays where it is more popular during lunch hours (1300-1600).
 
-```{r, layout="l-body-outset", fig.width=8.5, fig.height=8}
+```{r, tidy.opts=list(width.cutoff=55),tidy=TRUE, layout="l-body-outset", fig.width=8.5, fig.height=8}
 ## Credit card volume by day of week
 ## Loading data
 Sys.setlocale("LC_TIME", "English")
@@ -286,7 +286,7 @@ glimpse(cc_data)
 
 Given that these timestamps may not be representative of the actual transaction time, we will be mindful of using this information for further analysis subsequently.
 
-```{r}
+```{r, tidy.opts=list(width.cutoff=55),tidy=TRUE}
 cc_data_incorrect_time <- cc_data_cleaned %>%
   filter(location == "Bean There Done That" |location == "Brewed Awakenings" |location == "Coffee Shack" |location == "Jack's Magical Beans")
 
@@ -299,7 +299,7 @@ DT::datatable(cc_data_incorrect_time, options = list(pageLength = 10, width="100
 
 3) Furthermore, we also noted that there are several transactions in Kronos Mart at 3am on 13 January and 19 January. This is highly unusual and warrants further investigation. We will be mindful of using this information for further analysis subsequently.
 
-```{r}
+```{r, tidy.opts=list(width.cutoff=60),tidy=TRUE}
 cc_data_kronos <- cc_data_cleaned %>%
   filter(location == "Kronos Mart")
 
@@ -312,7 +312,7 @@ DT::datatable(cc_data_kronos, options = list(pageLength = 10, width="100%"))
 
 4) As seen in the datatables below, there are 55 credit cards but only 54 loyalty card spending information provided. This is unusual as all employees are provided with a loyalty card. This discrepancy may arise because the employee does not want his/ her transactions to be tracked and hence is avoiding using the loyalty card, or that employees are using more than 1 credit card for their purchases.
 
-```{r}
+```{r, tidy.opts=list(width.cutoff=55),tidy=TRUE}
 ##loyalty card
 distinct_loyalty <- loyalty_data_cleaned  %>%
   group_by(loyaltynum) %>%
@@ -322,7 +322,7 @@ distinct_loyalty <- loyalty_data_cleaned  %>%
 DT::datatable(distinct_loyalty, options = list(columnDefs = list(list(className = 'dt-center', targets = 0:2, width = '20%'))))
 ```
 
-```{r}
+```{r, tidy.opts=list(width.cutoff=60),tidy=TRUE}
 ##credit card
 distinct_cc <- cc_data_cleaned  %>%
   group_by(last4ccnum) %>%
@@ -342,7 +342,7 @@ More investigation should be made into this discrepancy. One explanation could b
 
 Given that the distinct employee count is significantly fewer than the number of distinct loyalty and credit cards, we should check with Gastech if there are any employees missing from this list. We should not expect the number of distinct employees and distinct loyalty cards to differ significantly as it does not make sense to issue an employee with multiple loyalty cards.
 
-```{r, fig.cap="Distinct employee names"}
+```{r, tidy.opts=list(width.cutoff=50),tidy=TRUE, fig.cap="Distinct employee names"}
 ##distinct employee names
 distinct_empname <- location_carid_join  %>%
   group_by(FirstName, LastName) %>%
@@ -354,12 +354,12 @@ distinct_empname <- subset(distinct_empname, select = -c(mean))
 DT::datatable(distinct_empname, filter = 'top', options = list(columnDefs = list(list(className = 'dt-center', targets = 0:2, autoWidth = TRUE, scrollX = TRUE))))
 ```
 
-```{r, fig.cap="Distinct loyalty card numbers"}
+```{r, tidy.opts=list(width.cutoff=50),tidy=TRUE, fig.cap="Distinct loyalty card numbers"}
 ##distinct loyalty cards
 DT::datatable(distinct_loyalty, options = list(columnDefs = list(list(className = 'dt-center', targets = 0:2, width = '20%'))))
 ```
 
-```{r, fig.cap="Distinct credit card numbers"}
+```{r, tidy.opts=list(width.cutoff=55),tidy=TRUE, fig.cap="Distinct credit card numbers"}
 ##distinct credit cards
 DT::datatable(distinct_cc, options = list( columnDefs = list(list(className = 'dt-center', targets = 0:2, width = '20%'))))
 ```
@@ -372,7 +372,7 @@ The case scenario does not state which CarIDs are referring to trucks. However, 
 
 To perform further investigation on this, we will plot the GPS paths of each carID over the Abila map to identify their route.
 
-```{r, fig.cap="Employees with no assigned car"}
+```{r, tidy.opts=list(width.cutoff=60),tidy=TRUE, fig.cap="Employees with no assigned car"}
 ##Employees with no cars assigned
 missing_carid <- location_carid_join  %>%
   group_by(id) %>%
@@ -382,7 +382,7 @@ missing_carid = subset(missing_carid, select = -c(lat,long,date,day,hour))
 DT::datatable(missing_carid, filter = 'top', options = list(autoWidth = TRUE, scrollX = TRUE))
 ```
 
-```{r, fig.cap="CarID with no assigned employee"}
+```{r, tidy.opts=list(width.cutoff=50),tidy=TRUE, fig.cap="CarID with no assigned employee"}
 ##Cars not assigned to employees
 missing_empname <- location_carid_join  %>%
   group_by(id, FirstName, LastName) %>%
@@ -471,7 +471,7 @@ We will first perform georeferencing using the SHP files provided.
 
 After preparing the georeferencing, we will then import the raster layer into RStudio.
 
-```{r}
+```{r, tidy.opts=list(width.cutoff=60),tidy=TRUE}
 ##Import raster layer
 bgmap <- raster("data/Geospatial/MC2-tourist.tif")
 bgmap
@@ -488,7 +488,7 @@ Using st_read() of sf package, import Abila shapefile into R. We will then conve
 Abila_st <- st_read(dsn = "data/Geospatial", layer = "Abila")
 ```
 
-```{r}
+```{r, tidy.opts=list(width.cutoff=50),tidy=TRUE}
 ##Converting gps data to Simple Feature Data Frame
 gps_data <- gps_data %>%
   mutate(day = get_day(gps_data$Timestamp), date = as_date(gps_data$Timestamp), minute = get_minute(gps_data$Timestamp), day_of_week = weekdays(gps_data$Timestamp), hour = get_hour(gps_data$Timestamp)) 
@@ -504,7 +504,7 @@ gps_sf <- st_as_sf(gps_data,
 
 Next, join the gps points into movement paths by using the drivers' IDs as unique identifiers.
 
-```{r}
+```{r, tidy.opts=list(width.cutoff=60),tidy=TRUE}
 ##Creating movement path from GPS points
 ##Group by need to come with summarize--> in this case we summarize using mean timestamp but this value is not needed
 gps_path <- gps_sf %>%
@@ -525,7 +525,7 @@ gps_path_cleaned <-gps_path[!(gps_path$points== 1),]
 
 Lastly, we then overplot the selected gps path onto the background tourist map.
 
-```{r}
+```{r, tidy.opts=list(width.cutoff=60),tidy=TRUE}
 ##Plotting GPS paths
 gps_path_selected <- gps_path_cleaned %>%
   filter(id == 1, day == 6)
@@ -543,7 +543,7 @@ By plotting the GPS coordinates using the Abila tourist map as background, we ar
 
 1) After mapping the GPS trajectories, We also noted that there were no GPS data indicating that any car stopped near "Bean There Done That", "Brewed Awakenings", "Coffee Shack" and "Jack's Magical Beans" during the period of transactions- 12:00pm. Hence, these transactions are either incorrectly timed or may even be fraudulent.
 
-```{r, layout="l-body-outset", fig.width=6, fig.height=20}
+```{r, tidy.opts=list(width.cutoff=60),tidy=TRUE}
 ##Interactive map
 gps_path_selected <- gps_path_cleaned %>%
   filter(hour == 12)
@@ -557,7 +557,7 @@ tm_shape(bgmap) +
 
 2) Furthermore as mentioned above, we also noted that there are several transactions in Kronos Mart at 3am on 13 January and 19 January. By filtering the map for 3am, we noted that there were no cars near Kronos Mart. Hence, these transactions are either incorrectly timed or may even be fraudulent. 
 
-```{r, layout="l-body-outset", fig.width=6, fig.height=3}
+```{r, tidy.opts=list(width.cutoff=60),tidy=TRUE, layout="l-body-outset", fig.width=6, fig.height=3}
 ##Facet map
 gps_path_selected <- gps_path_cleaned %>%
   filter(hour == 3)
@@ -582,7 +582,7 @@ By following the GPS coordinates of each carID, we are then able to identify the
 
 We have used an interactive map and facet map below to visualize the route for CarID 1 across 1/6/2014. This allows for easy observation and matching to the credit card data. 
 
-```{r, layout="l-body-outset", fig.width=6, fig.height=5}
+```{r, tidy.opts=list(width.cutoff=60),tidy=TRUE}
 ##Plotting GPS paths- interactive map
 gps_path_selected <- gps_path_cleaned %>%
   filter(id == 1, day == 6)
@@ -596,7 +596,7 @@ tm_shape(bgmap) +
 
 In this case, we can see that the day begins at 0720 where Car 1 drives towards Hallowed Grounds and stops here for 35 minutes. It then leaves Hallowed Grounds at 0757 and reaches Gastech at 0804. At 1217, Car 1 drives towards Albert's Fine Clothes, arriving at 1226. It departs at 1325 back to Gastech and arrives at 1334. At 1744, Car 1 leaves Gastech toward the area near Hallowed Grounds, arriving at 1748. At 1936, Car 1 leaves the area near Hallowed Grounds for an area near Albert's Fine Clothes and arrives at 1949. It then departs at 2027 back to the area near Hallowed Grounds, arriving at 2033. At 2211, Car 1 once again departs the area near Hallowed Grounds for Gastech, arriving at 2215, and only returns to the area near Hallowed Grounds at 0100 on 01/07/2014, arriving at 0114.
 
-```{r, layout="l-body-outset", fig.width=6, fig.height=5}
+```{r, tidy.opts=list(width.cutoff=60),tidy=TRUE, layout="l-body-outset", fig.width=6, fig.height=5}
 ##Facet map- by hour
 gps_path_selected <- gps_path_cleaned %>%
   filter(id == 1, day == 6)
@@ -613,7 +613,7 @@ By visualizaing the route, we can filter the below credit card table for the rel
 
 In this case, by filtering the below table for Hallowed Grounds on day 6, hour 7, we noted that credit card number ending with 9551 is on the list of transactions. Repeating this process for the locations visited throughout the 2 weeks period, we have matched Car 1 to credit card number ending with 9551.
 
-```{r}
+```{r, tidy.opts=list(width.cutoff=55),tidy=TRUE}
 cc_data_cleaned_min <- subset(cc_data_cleaned, select = -c(daynumber, timestamp))
 DT::datatable(cc_data_cleaned_min, filter = "top", fillContainer = T, options = list(scrollX=TRUE, autoWidth=TRUE, scroller=TRUE, scrollY = '450px'))
 ```
@@ -635,7 +635,7 @@ Using the above dataset, we will be able to identify the owners of each credit c
 
 In the car assignment dataset provided, truck drivers are not assigned to a particular truck number. Hence we are unable to identify which credit card belongs to which truck driver as there is no car assignment information provided. We have managed to match the trajectories of trucks to 9 different credit cards, which coincides with the number of truck drivers. Hence this reinforces our opinion that trucks are shared among the truck drivers. With the limited information, we are unable to match the credit card to truck driver, but only to the CarID.
 
-```{r}
+```{r, tidy.opts=list(width.cutoff=55),tidy=TRUE}
 ##Non-truck drivers
 cc_carid_emp_match_NT <- cc_carid_match %>%
   filter(CarID != 100 , CarID != 101 , CarID != 102 , CarID != 103 , CarID != 104 , CarID != 105 , CarID != 106 , CarID != 107) %>%
@@ -645,7 +645,7 @@ cc_carid_emp_match_NT <- cc_carid_match %>%
 DT::datatable(cc_carid_emp_match_NT, filter = "top", fillContainer = T, options = list(scrollX=TRUE, autoWidth=TRUE, scroller=TRUE, scrollY = '450px'))
 ```
 
-```{r}
+```{r, tidy.opts=list(width.cutoff=55),tidy=TRUE}
 ##Truck drivers
 cc_carid_emp_match_T <- cc_carid_match %>%
   filter(CarID == 100 | CarID == 101 | CarID == 102 | CarID == 103 | CarID == 104 | CarID == 105 | CarID == 106 | CarID == 107) %>%
@@ -657,7 +657,7 @@ cc_carid_emp_match_T
 
 After matching the timestamp of credit card transactions to CarID using the trajectory visualization, we can then match the credit card and loyalty card owners, using full join on 3 criteria match- 1) Date, 2) Location and 3) Price. 
 
-```{r}
+```{r, tidy.opts=list(width.cutoff=55),tidy=TRUE}
 ##Match loyalty and credit cards
 loyalty_cc_match <- cc_data_cleaned %>%
   full_join(loyalty_data_cleaned, by = c("date", "location", "price"))
@@ -688,7 +688,7 @@ loyalty_cc_match_count
 
 Based on the above results, we noted that there are seven credit cards mapped to more than 1 loyalty card. This is likely to be a duplicate due to the method being used to match both cards. We will investigate each match individually to identify if its a true match or simply a coincidence. To differentiate the former from the latter, we will assess if there are several transactions made with the same combination of credit and loyalty card number. If there is only a single transaction made with the same combination, it is likely a coincidence. This can be done using the interactive datatable below.
 
-```{r}
+```{r, tidy.opts=list(width.cutoff=55),tidy=TRUE}
 DT::datatable(loyalty_cc_match, extensions='Scroller', fillContainer = T, filter = "top", options = list(scrollX=TRUE, autoWidth=TRUE, scroller=TRUE, scrollY = '450px')) %>% formatDate(4, method = 'toLocaleDateString')
 ```
 
@@ -732,19 +732,19 @@ cc_loyalty_match_obs <- cc_data_cleaned %>%
 cc_loyalty_match_obs
 ```
 
-```{r}
+```{r, tidy.opts=list(width.cutoff=55),tidy=TRUE}
 DT::datatable(loyalty_cc_match, extensions='Scroller', fillContainer = T, filter = "top", options = list(scrollX=TRUE, autoWidth=TRUE, scroller=TRUE, scrollY = '450px')) %>% formatDate(4, method = 'toLocaleDateString')
 ```
 
 Given the assumption that the combination of credit and loyalty cards with only one transaction are due to coincidence, we will drop these duplicate matches.
     
-```{r}
+```{r, tidy.opts=list(width.cutoff=55),tidy=TRUE}
 loyalty_cc_match_cleaned<-loyalty_cc_match[!(loyalty_cc_match$last4ccnum == "4795" & loyalty_cc_match$loyaltynum == "L2070" | loyalty_cc_match$last4ccnum == "5921" & loyalty_cc_match$loyaltynum == "L9406" | loyalty_cc_match$last4ccnum == "7889" & loyalty_cc_match$loyaltynum == "L2247" | loyalty_cc_match$last4ccnum == "4948" & loyalty_cc_match$loyaltynum == "L3295" | loyalty_cc_match$last4ccnum == "5368" & loyalty_cc_match$loyaltynum == "L6119" | loyalty_cc_match$last4ccnum == "8332" & loyalty_cc_match$loyaltynum == "L8566"),]
 ```
 
 We then match the loyalty and credit card data to the car assignment data matched with credit card.
 
-```{r}
+```{r, tidy.opts=list(width.cutoff=60),tidy=TRUE}
 cards_emp_match <- left_join(loyalty_cc_match_cleaned, cc_carid_match, by = "last4ccnum") %>%
   drop_na() %>%
   left_join(assignment_data, by = "CarID")
@@ -754,7 +754,7 @@ cards_emp_match <- left_join(loyalty_cc_match_cleaned, cc_carid_match, by = "las
 
 1) **Assumption that employee will make a transaction when they visit a location.** GPS coordinates only infer that the employee was at a certain area but does not mean that he/she has to make any purchases when at that location. Hence matching GPS data to transaction data alone may not be accurate in some instances where employee does not spend or makes purchases using cash instead of credit card, which will not reflect in the credit card transaction dataset.
 
-2) As the tourist map only provides information about certain tourist attractions and not all the locations in Abila, we are unable to match the full list of locations from trajectory as seen in the map view to the transactions occurring in locations which are not reflected in tourist map (e.g. Abila Zacharo). This may result in **incorrect matching as it is more of a guesswork** as not all locations visited in the GPS trajectory can be mapped to an actual transaction.
+2) As the tourist map only shows certain tourist attractions and not all the locations in Abila, we are unable to match the full list of locations from trajectory as seen in the map view to the transactions occurring in locations which are not reflected in tourist map (e.g. Abila Zacharo). This may result in **incorrect matching as it is more of a guesswork** as not all locations visited in the GPS trajectory can be mapped to an actual transaction.
 
 3) There are **differences in the amount recorded on credit card and loyalty card for certain transactions**, hence resulting in N/As in the joined dataset. We have removed the rows with N/As and instead worked with the joined data. However, this is based on the assumption that card transactions with same date, location and price relate to the same transaction. There may be instances of **pure coincidence** when this is not true, as described above.
 
@@ -772,11 +772,11 @@ cards_emp_match <- left_join(loyalty_cc_match_cleaned, cc_carid_match, by = "las
 
 **Qn4- Given the data sources provided, identify potential informal or unofficial relationships among GASTech personnel. Provide evidence for these relationships.**
 
-### Network Visualisation
+### 4.1 Network Visualisation
 
 We will first create a network graph using the following code chunks.
 
-```{r}
+```{r, tidy.opts=list(width.cutoff=55),tidy=TRUE}
 ##Prepare data
 cc_carid_emp_match <- cc_carid_match %>%
   drop_na() %>%
@@ -891,12 +891,12 @@ visNetwork(cc_nodes, cc_edges, height = "800px", width = "100%") %>%
   visLayout(randomSeed = 123)
 ```
 
-```{r, fig.height=6}
+```{r, tidy.opts=list(width.cutoff=55),tidy=TRUE, fig.height=6}
 cc_data_cleaned_matched <- subset(cc_data_cleaned_matched, select = -c(timestamp, day, price))
 DT::datatable(cc_data_cleaned_matched, fillContainer = T, extensions='Scroller', filter = "top", options = list(scrollX=TRUE, autoWidth=TRUE, scroller=TRUE, scrollY = '450px'))
 ```
 
-### Network Analysis
+### 4.2 Network Analysis
 
 We have derived the following potential informal relationships between employees.
 
@@ -927,7 +927,7 @@ We have derived the following potential informal relationships between employees
 
 **Qn5- Do you see evidence of suspicious activity? Identify 1- 10 locations where you believe the suspicious activity is occurring, and why.**
 
-### Suspicious Activities identified
+### 5.1 Suspicious Activities identified
 
 We have identified the following suspicious activities:
 
@@ -937,12 +937,12 @@ Nils Calixto (IT Helpdesk) returned back to Gastech during late hours frequently
 
 From the facet graph below, we observe that he has returned to office during the period 2100-2400 on 01/06/2014, 01/08/2014, 01/15/2014 and 01/17/2014.
 
-```{r, layout="l-body-outset", fig.width=8, fig.height=5, fig.cap="Facet graph of CarID 1 at time 2100-2400 by day"}
+```{r, tidy.opts=list(width.cutoff=60),tidy=TRUE, layout="l-body-outset", fig.width=6, fig.height=3, fig.cap="Facet graph of CarID 1 at time 2100-2400 by day"}
 ##Facet map- by day
 gps_path_selected <- gps_path_cleaned %>%
   filter(id == 1, timegroup == "21-24")
   
-tmap_mode("view")
+tmap_mode("plot")
 tm_shape(bgmap) +
   tm_rgb(bgmap, r = 1, g = 2, b = 3, alpha = NA, saturation = 1, interpolate = TRUE, max.value = 255) +
   tm_shape(gps_path_selected) +
@@ -955,12 +955,12 @@ Filtering the datatable below, we also observe that Nils Calixto has made severa
     - Made a purchase at U-Pump at 1318 on 01/13/2014. However, we noted that Nils Calixto GPS coordinates put him at an area near Albert's Fine Clothes instead of U-Pump when the credit card transaction was made.
     - Only person to have made a transaction at Daily Dealz at 0604. However, there were no GPS information during this time. As the vehicles are tracked as long as they are moving, one would assume that Nils Calixto did not drive to Daily Dealz to make the purchase.
     
-```{r, layout="l-body-outset", fig.width=12, fig.height=10, fig.cap="Datatable of credit card transactions"}
+```{r, tidy.opts=list(width.cutoff=55),tidy=TRUE, layout="l-body-outset", fig.width=12, fig.height=10, fig.cap="Datatable of credit card transactions"}
 cc_data_cleaned_matched_DT <- subset(cc_data_cleaned_matched, select = -c(daynumber))
 DT::datatable(cc_data_cleaned_matched_DT, extensions='Scroller', filter = "top", fillContainer = T, options = list(scrollX=TRUE, autoWidth=TRUE, scroller=TRUE, scrollY = '450px'))
 ```
 
-```{r, layout="l-body-outset", fig.width=6, fig.height=5, fig.cap="Interactive map of CarID 1 on day 13, timegroup 1300-1600"}
+```{r, tidy.opts=list(width.cutoff=60),tidy=TRUE, fig.cap="Interactive map of CarID 1 on day 13, timegroup 1300-1600"}
 ##Plotting GPS paths- interactive map
 gps_path_selected <- gps_path_cleaned %>%
   filter(id == 1, day == 13, timegroup == "13-16")
@@ -994,12 +994,12 @@ The employees who attended the gathering seem to be mainly from the Engineering 
     - Felix Balas (Engineer)- CarID 3 (left later at 11/1/2014 0000)
     - Marin Onda (Drill Site Manager)- CarID 26 (left later at 11/1/2014 0000)
     
-```{r, layout="l-body-outset", fig.width=12, fig.height=10, fig.cap="Facet graph of all cars moving at time 2200 - 2300 on day 10"}
+```{r, tidy.opts=list(width.cutoff=60),tidy=TRUE, layout="l-body-outset", fig.width=6, fig.height=7.5, fig.cap="Facet graph of all cars moving at time 2200 - 2300 on day 10"}
 ##Facet map- by id
 gps_path_selected <- gps_path_cleaned %>%
   filter(day == 10, hour == 23 | hour == 22)
   
-tmap_mode("view")
+tmap_mode("plot")
 tm_shape(bgmap) +
   tm_rgb(bgmap, r = 1, g = 2, b = 3, alpha = NA, saturation = 1, interpolate = TRUE, max.value = 255) +
   tm_shape(gps_path_selected) +
@@ -1007,7 +1007,7 @@ tm_shape(bgmap) +
   tm_facets(by = "id", ncol = 3)
 ```
 
-```{r, layout="l-body-outset", fig.width=6, fig.height=2, fig.cap="Facet graph of all cars moving at time 0000 on day 11"}
+```{r, tidy.opts=list(width.cutoff=60),tidy=TRUE, fig.cap="Facet graph of all cars moving at time 0000 on day 11"}
 ##Facet map- by id
 gps_path_selected <- gps_path_cleaned %>%
   filter(day == 11, hour == 00)
@@ -1024,7 +1024,7 @@ tm_shape(bgmap) +
 
 Isia Vann (Perimeter Control)(CarID 16) visited a house in Barwyn Street late on 01/10/2014 at 2300 and only left on 01/11/2014 at 0300. This seems to be a one-time occurrence throughout the two weeks.
 
-```{r, fig.cap="Interactive graph of CarID16 at time 2300 on day 10"}
+```{r, tidy.opts=list(width.cutoff=60),tidy=TRUE, fig.cap="Interactive graph of CarID16 at time 2300 on day 10"}
 ##Interactive map
 gps_path_selected <- gps_path_cleaned %>%
   filter(id == 16, day == 10, hour == 23)
@@ -1036,7 +1036,7 @@ tm_shape(bgmap) +
   tm_lines(col= "red")
 ```
 
-```{r, fig.cap="Interactive graph of CarID 16 at time 0300 on day 11"}
+```{r, tidy.opts=list(width.cutoff=60),tidy=TRUE, fig.cap="Interactive graph of CarID 16 at time 0300 on day 11"}
 ##Interactive map
 gps_path_selected <- gps_path_cleaned %>%
   filter(id == 16, day == 11, hour == 3)
@@ -1055,12 +1055,12 @@ The following employees have been visiting a similar location near Spetson Park 
     - Isia Vann (Perimeter Control, CarID 16) also had a similar trajectory as Loreto Bodrogi. She left her house at 2301 on 01/06/2014 and arrived at the area near Spetson Park at 2309. She then remained in the same area and left only at 0730 and drove directly to Gastech without making any other stops. 
     - Both Loreto and Isia's paths would have crossed on their trip to the area near Spetson Park on 01/07/2014. They also left around the same time. They both took the same route to Gastech although Loreto Bodrogi made a transaction at Brewed Awakenings.
 
-```{r, fig.cap="Facet graph of CarID 10 at 1800 (afterwork hours)"}
-##Interactive map
+```{r, tidy.opts=list(width.cutoff=60),tidy=TRUE, layout="l-body-outset", fig.width=6, fig.height=7.5, fig.cap="Facet graph of CarID 10 at 1800 (afterwork hours)"}
+##Facet map
 gps_path_selected <- gps_path_cleaned %>%
   filter(id == 10, hour == 18)
   
-tmap_mode("view")
+tmap_mode("plot")
 tm_shape(bgmap) +
   tm_rgb(bgmap, r = 1, g = 2, b = 3, alpha = NA, saturation = 1, interpolate = TRUE, max.value = 255) +
   tm_shape(gps_path_selected) +
@@ -1068,7 +1068,7 @@ tm_shape(bgmap) +
   tm_facets(by = "day", ncol = 3)
 ```
 
-```{r, fig.cap="Interactive graph of CarID 15 on 01/07/2014"}
+```{r, tidy.opts=list(width.cutoff=60),tidy=TRUE, fig.cap="Interactive graph of CarID 15 on 01/07/2014"}
 ##Interactive map
 gps_path_selected <- gps_path_cleaned %>%
   filter(id == 15, day == 7)
@@ -1080,7 +1080,7 @@ tm_shape(bgmap) +
   tm_lines(col= "red") 
 ```
 
-```{r, fig.cap="Interactive graph of CarID 16 on 01/06/2014"}
+```{r, tidy.opts=list(width.cutoff=60),tidy=TRUE, fig.cap="Interactive graph of CarID 16 on 01/06/2014"}
 ##Interactive map
 gps_path_selected <- gps_path_cleaned %>%
   filter(id == 16, day == 6, hour == 23)
@@ -1099,12 +1099,12 @@ The following employees have been visiting a similar location near Taxichorn Par
     - Minke Mies (Perimeter Control, CarID 24) also visited Taxichorn Park on 01/09/2014, departing from his house at 2300 on 01/08/2014 and arriving at 2306. He only departed the area at 0330 and headed directly home, reaching at 0340.
     - Minke Mies left Taxichorn Park just as Loreto Bodrogi arrived. This is highly suspicious as they seem to be taking shifts for some kind of stakeout.
 
-```{r, fig.cap="Facet graph of CarID 32 at 1700-1800 (afterwork hours)"}
+```{r, tidy.opts=list(width.cutoff=60),tidy=TRUE, layout="l-body-outset", fig.width=6, fig.height=7.5, fig.cap="Facet graph of CarID 32 at 1700-1800 (afterwork hours)"}
 ##Interactive map
 gps_path_selected <- gps_path_cleaned %>%
   filter(id == 32, hour == 18 | hour == 17)
   
-tmap_mode("view")
+tmap_mode("plot")
 tm_shape(bgmap) +
   tm_rgb(bgmap, r = 1, g = 2, b = 3, alpha = NA, saturation = 1, interpolate = TRUE, max.value = 255) +
   tm_shape(gps_path_selected) +
@@ -1112,7 +1112,7 @@ tm_shape(bgmap) +
   tm_facets(by = "day", ncol = 3)
 ```
 
-```{r, fig.cap="Interactive graph of CarID 15 on 01/09/2014"}
+```{r, tidy.opts=list(width.cutoff=60),tidy=TRUE, fig.cap="Interactive graph of CarID 15 on 01/09/2014"}
 ##Interactive map
 gps_path_selected <- gps_path_cleaned %>%
   filter(id == 15, day == 9)
@@ -1124,7 +1124,7 @@ tm_shape(bgmap) +
   tm_lines(col= "red") 
 ```
 
-```{r, fig.cap="Interactive graph of CarID 24 on 01/08/2014"}
+```{r, tidy.opts=list(width.cutoff=60),tidy=TRUE, fig.cap="Interactive graph of CarID 24 on 01/08/2014"}
 ##Interactive map
 gps_path_selected <- gps_path_cleaned %>%
   filter(id == 24, day == 8, hour == 23)
@@ -1140,7 +1140,7 @@ tm_shape(bgmap) +
 
 On 01/11/2014 night, Bertrand Ovan (Facilities Group Manager, CarID 29) visited a sequence of places, without making any transactions. He left his house at 22:11, arriving at Brew've Been Served Cafe at 2212. After staying for 9 minutes, he went to the Ouzeri Elian, arriving at 2227. He then left at 2234 and headed for the place near Kronos Mart and arrived at 22:40. 15 minutes later, he went to the Alberts Fine Clothing arriving at 2258 and stayed there for another 23 minutes. He drove to an area near U-Pump or Jack Magic Beans, starting from 2321 and arrived at the at 23:25. He stayed there for about 30 minutes, and arrived home at exactly 2359. This is quite unusual as he visited several locations without making any transactions. 
 
-```{r, fig.cap="Interactive graph of CarID 29 on 01/11/2014"}
+```{r, tidy.opts=list(width.cutoff=60),tidy=TRUE, fig.cap="Interactive graph of CarID 29 on 01/11/2014"}
 ##Interactive map
 gps_path_selected <- gps_path_cleaned %>%
   filter(id == 29, day == 11, timegroup == "21-24")
@@ -1152,7 +1152,7 @@ tm_shape(bgmap) +
   tm_lines(col= "red") 
 ```
 
-```{r, layout="l-body-outset", fig.width=12, fig.height=10, fig.cap="Datatable of credit card transactions"}
+```{r, tidy.opts=list(width.cutoff=55),tidy=TRUE, layout="l-body-outset", fig.width=12, fig.height=10, fig.cap="Datatable of credit card transactions"}
 cc_data_cleaned_matched_DT <- subset(cc_data_cleaned_matched, select = -c(daynumber))
 DT::datatable(cc_data_cleaned_matched_DT, extensions='Scroller', filter = "top", fillContainer = T, options = list(scrollX=TRUE, autoWidth=TRUE, scroller=TRUE, scrollY = '450px'))
 ```
@@ -1166,12 +1166,12 @@ The following employees have been visiting a similar location late at night. On 
     - Both Minke Mies and Hennies Osvaldo may have crossed paths on 01/14/2014 as they seem to only miss each other by a minute.
     - Both Isia Vann  and Hennies Osvaldo may have crossed paths on 01/11/2014 as they seem to only miss each other by a short period of time.
 
-```{r, fig.cap="Facet graph of CarID 4 at 1700-1800 (afterwork hours)"}
+```{r, tidy.opts=list(width.cutoff=60),tidy=TRUE, layout="l-body-outset", fig.width=6, fig.height=7.5, fig.cap="Facet graph of CarID 4 at 1700-1800 (afterwork hours)"}
 ##Interactive map
 gps_path_selected <- gps_path_cleaned %>%
   filter(id == 4, hour == 18 | hour == 17)
   
-tmap_mode("view")
+tmap_mode("plot")
 tm_shape(bgmap) +
   tm_rgb(bgmap, r = 1, g = 2, b = 3, alpha = NA, saturation = 1, interpolate = TRUE, max.value = 255) +
   tm_shape(gps_path_selected) +
@@ -1179,7 +1179,7 @@ tm_shape(bgmap) +
   tm_facets(by = "day", ncol = 3)
 ```
 
-```{r, fig.cap="Interactive graph of CarID 16 on 01/10/2014, timegroup 2100-2400"}
+```{r, tidy.opts=list(width.cutoff=60),tidy=TRUE, fig.cap="Interactive graph of CarID 16 on 01/10/2014, timegroup 2100-2400"}
 ##Interactive map
 gps_path_selected <- gps_path_cleaned %>%
   filter(id == 16, day == 10, timegroup == "21-24")
@@ -1191,7 +1191,7 @@ tm_shape(bgmap) +
   tm_lines(col= "red") 
 ```
 
-```{r, fig.cap="Interactive graph of CarID 24 on 01/14/2014"}
+```{r, tidy.opts=list(width.cutoff=60),tidy=TRUE, fig.cap="Interactive graph of CarID 24 on 01/14/2014"}
 ##Interactive map
 gps_path_selected <- gps_path_cleaned %>%
   filter(id == 24, day == 14)
@@ -1203,7 +1203,7 @@ tm_shape(bgmap) +
   tm_lines(col= "red") 
 ```
 
-```{r, fig.cap="Interactive graph of CarID 21 on 01/11/2014"}
+```{r, tidy.opts=list(width.cutoff=60),tidy=TRUE, fig.cap="Interactive graph of CarID 21 on 01/11/2014"}
 ##Interactive map
 gps_path_selected <- gps_path_cleaned %>%
   filter(id == 21, day == 11)
@@ -1215,7 +1215,7 @@ tm_shape(bgmap) +
   tm_lines(col= "red") 
 ```
 
-```{r, fig.cap="Graph of CarID 21 on 01/13/2014 and 01/14/2014"}
+```{r, tidy.opts=list(width.cutoff=60),tidy=TRUE, fig.cap="Graph of CarID 21 on 01/13/2014 and 01/14/2014"}
 gps_path_selected1 <- gps_path_cleaned %>%
   filter(id == 21, day == 13, hour == 23)
   
@@ -1232,7 +1232,7 @@ m2 <- tm_shape(bgmap) +
   tm_shape(gps_path_selected2) +
   tm_lines(col= "red") 
 
-current.mode <- tmap_mode("view")
+current.mode <- tmap_mode("plot")
 tmap_arrange(m1,m2)
 tmap_mode(current.mode)
 ```
@@ -1241,12 +1241,12 @@ tmap_mode(current.mode)
 
 Hennie Osavado seems to own two residences- 1) Area next to Guy's Gyros, 2) Area near Frydo's Autosupply N'More. He typically returns to the second house on weekdays and the first house on weekends, with the exception of 01/08/2014 and 01/15/2014.
 
-```{r, layout="l-body-outset", fig.width=6, fig.height=4, fig.cap="Facet graph of CarID 21 on from 1700-2400"}
+```{r, tidy.opts=list(width.cutoff=60),tidy=TRUE, layout="l-body-outset", fig.width=6, fig.height=7.5, fig.cap="Facet graph of CarID 21 on from 1700-2400"}
 ##Facet map- by day
 gps_path_selected <- gps_path_cleaned %>%
   filter(id == 21, timegroup == "21-24"| timegroup == "17-20")
   
-tmap_mode("view")
+tmap_mode("plot")
 tm_shape(bgmap) +
   tm_rgb(bgmap, r = 1, g = 2, b = 3, alpha = NA, saturation = 1, interpolate = TRUE, max.value = 255) +
   tm_shape(gps_path_selected) +
@@ -1260,12 +1260,12 @@ As discussed above, we also noted that Elsa Orilla (Drill Technician, CarID 7) a
 
 On further investigation, there are two employees with last name Orilla. We do not have further information on whether there is a relationship between them. However if they are partners, this may present as an illicit relationship given that it occurs frequently during lunch hours on weekdays when Kare Orilla is having lunch elsewhere. We also noticed that both parties tend to stagger their departure time from the location for about 10 minutes.
 
-```{r, layout="l-body-outset", fig.width=6, fig.height=7, fig.cap="Facet graph of CarID 21 during 1200-1400"}
+```{r, tidy.opts=list(width.cutoff=60),tidy=TRUE, layout="l-body-outset", fig.width=6, fig.height=7.5, fig.cap="Facet graph of CarID 21 during 1200-1400"}
 ##Facet map- by id
 gps_path_selected <- gps_path_cleaned %>%
   filter(id == 7, hour == 12| hour == 13| hour == 14)
   
-tmap_mode("view")
+tmap_mode("plot")
 tm_shape(bgmap) +
   tm_rgb(bgmap, r = 1, g = 2, b = 3, alpha = NA, saturation = 1, interpolate = TRUE, max.value = 255) +
   tm_shape(gps_path_selected) +
@@ -1273,7 +1273,7 @@ tm_shape(bgmap) +
   tm_facets(by = "day", ncol = 3)
 ```
 
-```{r, layout="l-body-outset", fig.width=6, fig.height=7, fig.cap="Facet graph of CarID 33 during 1200-1400"}
+```{r, tidy.opts=list(width.cutoff=60),tidy=TRUE, layout="l-body-outset", fig.width=6, fig.height=6, fig.cap="Facet graph of CarID 33 during 1200-1400"}
 ##Facet map- by id
 gps_path_selected <- gps_path_cleaned %>%
   filter(id == 33, hour == 12| hour == 13| hour == 14)
@@ -1286,7 +1286,7 @@ tm_shape(bgmap) +
   tm_facets(by = "day", ncol = 3)
 ```
 
-```{r, layout="l-body-outset", fig.width=12, fig.height=10, fig.cap="Datatable of credit card transactions"}
+```{r, tidy.opts=list(width.cutoff=55),tidy=TRUE, layout="l-body-outset", fig.width=12, fig.height=10, fig.cap="Datatable of credit card transactions"}
 cc_data_cleaned_matched_DT <- subset(cc_data_cleaned_matched, select = -c(daynumber))
 DT::datatable(cc_data_cleaned_matched_DT, extensions='Scroller', filter = "top", fillContainer = T, options = list(scrollX=TRUE, autoWidth=TRUE, scroller=TRUE, scrollY = '450px'))
 ```
@@ -1295,12 +1295,12 @@ DT::datatable(cc_data_cleaned_matched_DT, extensions='Scroller', filter = "top",
 
 Hennie Osvaldo (Perimeter Control, CarID 21), Minke Mies (Perimeter Control, CarID 24), Inga Ferro (Site Control, CarID 13) and Loreto Bodrogi (Site Control, CarID 15) usually take turns visiting a selected few locations during the lunch break (except for 01/06/2014, 01/12/2014 and 01/19/2014). These locations include 1) Area near Frank's Fuels, 2) Area west of Bean There Done That, 3) Area south of Hallowed Grounds, 4) Area south of Katerina's Cafe and 5) Area south-west of the Arkadious Park. These locations are not near most of the usual dining locations and some tend to be quite out of the way. Hence this has been raised as suspicious behavior.
 
-```{r, layout="l-body-outset", fig.width=6, fig.height=7, fig.cap="Facet graph of the various car trajectories during 1200-1300"}
+```{r, tidy.opts=list(width.cutoff=60),tidy=TRUE, layout="l-body-outset", fig.width=6, fig.height=7.5, fig.cap="Facet graph of the various car trajectories during 1200-1300"}
 ##Facet map- by id
 gps_path_selected <- gps_path_cleaned %>%
   filter(id == 21 | id == 24 | id == 13 | id == 15, hour == 12 | hour == 13)
   
-tmap_mode("view")
+tmap_mode("plot")
 tm_shape(bgmap) +
   tm_rgb(bgmap, r = 1, g = 2, b = 3, alpha = NA, saturation = 1, interpolate = TRUE, max.value = 255) +
   tm_shape(gps_path_selected) +
@@ -1322,12 +1322,12 @@ Furthermore, we noted that Minke Mies (Perimeter Control, CarID 24) did not have
 
 Lastly, Bertrand Ovan (Facilities Group Manager, CarID29) drove around the city from 2211 till midnight on 01/11/2014, and stopped near U-Pump from 2325 to 2355 without related transactions.
 
-```{r, layout="l-body-outset", fig.width=12, fig.height=10, fig.cap="Datatable of credit card transactions"}
+```{r, tidy.opts=list(width.cutoff=55),tidy=TRUE, layout="l-body-outset", fig.width=12, fig.height=10, fig.cap="Datatable of credit card transactions"}
 cc_data_cleaned_matched_DT <- subset(cc_data_cleaned_matched, select = -c(daynumber))
 DT::datatable(cc_data_cleaned_matched_DT, extensions='Scroller', filter = "top", fillContainer = T, options = list(scrollX=TRUE, autoWidth=TRUE, scroller=TRUE, scrollY = '450px'))
 ```
 
-```{r, fig.cap="Interactive graph of CarID 1 on 01/13/2014 at 1300"}
+```{r, tidy.opts=list(width.cutoff=60),tidy=TRUE, fig.cap="Interactive graph of CarID 1 on 01/13/2014 at 1300"}
 ##Interactive map
 gps_path_selected <- gps_path_cleaned %>%
   filter(id == 1, day == 13, hour == 13)
@@ -1339,7 +1339,7 @@ tm_shape(bgmap) +
   tm_lines(col= "red") 
 ```
 
-```{r, fig.cap="Interactive graph of CarID 24 on 01/13/2014 at 1200- 1300"}
+```{r, tidy.opts=list(width.cutoff=60),tidy=TRUE, fig.cap="Interactive graph of CarID 24 on 01/13/2014 at 1200- 1300"}
 ##Interactive map
 gps_path_selected <- gps_path_cleaned %>%
   filter(id == 24, day == 13, hour == 12 | hour == 13)
@@ -1351,7 +1351,7 @@ tm_shape(bgmap) +
   tm_lines(col= "red") 
 ```
 
-```{r, fig.cap="Interactive graph of CarID 29 on 01/11/2014 at 2200- 2400"}
+```{r, tidy.opts=list(width.cutoff=60),tidy=TRUE, fig.cap="Interactive graph of CarID 29 on 01/11/2014 at 2200- 2400"}
 ##Interactive map
 gps_path_selected <- gps_path_cleaned %>%
   filter(id == 29, day == 11, hour == 22 | hour == 23)
@@ -1372,12 +1372,12 @@ We noted that for most days across the two weeks analyzed, trucks are usually no
     - On 01/17/2014, CarID 107 was departed Nationwide Refinery for Abila Port, arriving at 1716 and departed almost immediately back to Gastech, arriving at 1721.
     - CarID 101, 104, 105 and 106 were operating till late from 1700 to 2106 on 01/16/2014. This is unusual given that trucks are usually not used after 1700.
 
-```{r, layout="l-body-outset", fig.width=6, fig.height=7, fig.cap="Facet graph of the various truck trajectories during 1700-2359"}
+```{r, tidy.opts=list(width.cutoff=60),tidy=TRUE, layout="l-body-outset", fig.width=6, fig.height=3, fig.cap="Facet graph of the various truck trajectories during 1700-2359"}
 ##Facet map- by day
 gps_path_selected <- gps_path_cleaned %>%
   filter(id == 101 | id == 104 | id == 105 | id == 106 | id == 107, timegroup == "17-20" | timegroup == "21-24")
   
-tmap_mode("view")
+tmap_mode("plot")
 tm_shape(bgmap) +
   tm_rgb(bgmap, r = 1, g = 2, b = 3, alpha = NA, saturation = 1, interpolate = TRUE, max.value = 255) +
   tm_shape(gps_path_selected) +
@@ -1394,16 +1394,16 @@ There are several transactions in Kronos Mart at 3am on 01/13/2014 and 01/19/201
     - On 01/19/2014, Nils Calixto (IT Helpdesk, CarID 1) made a transaction at 0345. Noted that his car trajectory puts him at Kronos Mart on 01/18/2014 at 1336 instead.
     - On 01/19/2014, Ada Campo-Corrente (CIO, CarID 10) made a transaction at 0348. Noted that his car trajectory puts him at Kronos Mart on 01/18/2014 at 1329 instead.
     
-```{r, layout="l-body-outset", fig.width=12, fig.height=5}
+```{r, tidy.opts=list(width.cutoff=55),tidy=TRUE, layout="l-body-outset", fig.width=12, fig.height=5}
 DT::datatable(cc_data_cleaned_matched, extensions='Scroller', filter = "top", fillContainer = T, options = list(scrollX=TRUE, autoWidth=TRUE, scroller=TRUE, scrollY = '450px'))
 ```
 
-```{r, layout="l-body-outset", fig.width=6, fig.height=7, fig.cap="Facet graph of CarID 32"}
+```{r, tidy.opts=list(width.cutoff=60),tidy=TRUE, fig.cap="Facet graph of CarID 32"}
 ##Facet map- by day
 gps_path_selected <- gps_path_cleaned %>%
   filter(id == 32,  day == 11 | day == 12)
   
-tmap_mode("view")
+tmap_mode("plot")
 tm_shape(bgmap) +
   tm_rgb(bgmap, r = 1, g = 2, b = 3, alpha = NA, saturation = 1, interpolate = TRUE, max.value = 255) +
   tm_shape(gps_path_selected) +
@@ -1411,7 +1411,7 @@ tm_shape(bgmap) +
   tm_facets(by = "day", ncol = 3)
 ```
 
-```{r, layout="l-body-outset", fig.width=6, fig.height=7, fig.cap="Facet graph of CarID 23"}
+```{r, tidy.opts=list(width.cutoff=60),tidy=TRUE, fig.cap="Facet graph of CarID 23"}
 ##Facet map- by day
 gps_path_selected <- gps_path_cleaned %>%
   filter(id == 23,  day == 18 | day == 19)
@@ -1424,12 +1424,12 @@ tm_shape(bgmap) +
   tm_facets(by = "day", ncol = 3)
 ```
 
-```{r, layout="l-body-outset", fig.width=6, fig.height=7, fig.cap="Facet graph of CarID 1"}
+```{r, tidy.opts=list(width.cutoff=60),tidy=TRUE, fig.cap="Facet graph of CarID 1"}
 ##Facet map- by day
 gps_path_selected <- gps_path_cleaned %>%
   filter(id == 1,  day == 18 | day == 19)
   
-tmap_mode("view")
+tmap_mode("plot")
 tm_shape(bgmap) +
   tm_rgb(bgmap, r = 1, g = 2, b = 3, alpha = NA, saturation = 1, interpolate = TRUE, max.value = 255) +
   tm_shape(gps_path_selected) +
@@ -1437,12 +1437,12 @@ tm_shape(bgmap) +
   tm_facets(by = "day", ncol = 3)
 ```
 
-```{r, layout="l-body-outset", fig.width=6, fig.height=7, fig.cap="Facet graph of CarID 10"}
+```{r, tidy.opts=list(width.cutoff=60),tidy=TRUE, fig.cap="Facet graph of CarID 10"}
 ##Facet map- by day
 gps_path_selected <- gps_path_cleaned %>%
   filter(id == 10,  day == 18 | day == 19)
   
-tmap_mode("view")
+tmap_mode("plot")
 tm_shape(bgmap) +
   tm_rgb(bgmap, r = 1, g = 2, b = 3, alpha = NA, saturation = 1, interpolate = TRUE, max.value = 255) +
   tm_shape(gps_path_selected) +
@@ -1459,7 +1459,7 @@ The following employees have made visits to Kronos Capitol over the two week per
     
 This is suspicious as the government sits at the Capitol and hence these employees might be liaising with the government on certain issues regarding environmental stewardship.
 
-```{r, fig.cap="Interactive graph of CarID 35 on 01/11/2014 at 1300- 1959"}
+```{r, tidy.opts=list(width.cutoff=60),tidy=TRUE, fig.cap="Interactive graph of CarID 35 on 01/11/2014 at 1300- 1959"}
 ##Interactive map
 gps_path_selected <- gps_path_cleaned %>%
   filter(id == 35, day == 11, timegroup == "13-16" | timegroup == "17-20")
@@ -1471,12 +1471,12 @@ tm_shape(bgmap) +
   tm_lines(col= "red") 
 ```
 
-```{r, fig.cap="Interactive graph of various car trajectories on 01/18/2014"}
+```{r, tidy.opts=list(width.cutoff=60),tidy=TRUE, layout="l-body-outset", fig.width=6, fig.height=3, fig.cap="Interactive graph of various car trajectories on 01/18/2014"}
 ##Interactive map
 gps_path_selected <- gps_path_cleaned %>%
   filter(id == 15 | id == 34 | id == 22 | id == 28, day == 18)
   
-tmap_mode("view")
+tmap_mode("plot")
 tm_shape(bgmap) +
   tm_rgb(bgmap, r = 1, g = 2, b = 3, alpha = NA, saturation = 1, interpolate = TRUE, max.value = 255) +
   tm_shape(gps_path_selected) +
@@ -1488,7 +1488,7 @@ tm_shape(bgmap) +
 
 We noted that CarID 28 trajectories are chaotic. This car is being assigned to Isande Borrasca (Drill Technician). There may have been tampering made to the GPS tracking system.
 
-```{r}
+```{r, tidy.opts=list(width.cutoff=60),tidy=TRUE}
 ##Interactive map
 gps_path_selected <- gps_path_cleaned %>%
   filter(id == 28)
@@ -1506,12 +1506,12 @@ Several of the executives were congregated at the Desafio Golf Course on Sundays
 
 We also noted that Sten Sanjorge Jr (President/CEO) seems to not be in Abila for most of the two weeks observed (hence missing the first golf gathering with the other executives) as his GPS records only start from 01/17/2014 to 01/19/2014. On his return, he seems to be staying at Chostus Hotel. We have inferred this by tracking the trajectories of his movement, we noted that he tends to return to the hotel during afterwork hours. This is unusual as Sten Sanjorge Jr does not seem to have a home in Abila.
 
-```{r, fig.cap="Interactive graph of various executives' car trajectories on 01/12/2014, 1200-1459"}
+```{r, tidy.opts=list(width.cutoff=60),tidy=TRUE, layout="l-body-outset", fig.width=6, fig.height=1.5, fig.cap="Interactive graph of various executives' car trajectories on 01/12/2014, 1200-1459"}
 ##Interactive map
 gps_path_selected <- gps_path_cleaned %>%
   filter(id == 35 | id == 4 | id == 10 , day == 12, hour == 12 | hour == 13 | hour == 14)
   
-tmap_mode("view")
+tmap_mode("plot")
 tm_shape(bgmap) +
   tm_rgb(bgmap, r = 1, g = 2, b = 3, alpha = NA, saturation = 1, interpolate = TRUE, max.value = 255) +
   tm_shape(gps_path_selected) +
@@ -1519,12 +1519,12 @@ tm_shape(bgmap) +
   tm_facets(by = "id", ncol = 3)
 ```
 
-```{r, fig.cap="Interactive graph of various executives' car trajectories on 01/19/2014, 1200-1359"}
+```{r, tidy.opts=list(width.cutoff=60),tidy=TRUE, layout="l-body-outset", fig.width=6, fig.height=3, fig.cap="Interactive graph of various executives' car trajectories on 01/19/2014, 1200-1359"}
 ##Interactive map
 gps_path_selected <- gps_path_cleaned %>%
   filter(id == 35 | id == 4 | id == 10 | id == 32 | id == 31, day == 19, hour == 12 | hour == 13)
   
-tmap_mode("view")
+tmap_mode("plot")
 tm_shape(bgmap) +
   tm_rgb(bgmap, r = 1, g = 2, b = 3, alpha = NA, saturation = 1, interpolate = TRUE, max.value = 255) +
   tm_shape(gps_path_selected) +
@@ -1532,12 +1532,12 @@ tm_shape(bgmap) +
   tm_facets(by = "id", ncol = 3)
 ```
 
-```{r, fig.cap="Interactive graph of CarID 31"}
+```{r, tidy.opts=list(width.cutoff=60),tidy=TRUE, layout="l-body-outset", fig.width=6, fig.height=1.5, fig.cap="Interactive graph of CarID 31"}
 ##Interactive map
 gps_path_selected <- gps_path_cleaned %>%
   filter(id == 31)
   
-tmap_mode("view")
+tmap_mode("plot")
 tm_shape(bgmap) +
   tm_rgb(bgmap, r = 1, g = 2, b = 3, alpha = NA, saturation = 1, interpolate = TRUE, max.value = 255) +
   tm_shape(gps_path_selected) +
@@ -1551,6 +1551,6 @@ We noted several transactions by truck drivers in eateries, which we assume are 
     - On 01/13/2014, credit card ended with 9220 (tagged to CarID 101) was used in Ouzeri Elian at 1255.
     - On 01/07/2014 to 01/09/2014 and 01/14/2014 to 01/16/2014, credit card ended with 7792 (tagged to CarID 105) was used in Katerina's Cafe between 1308-1323.
     
-```{r, layout="l-body-outset", fig.width=12, fig.height=5}
+```{r, tidy.opts=list(width.cutoff=55),tidy=TRUE, layout="l-body-outset", fig.width=12, fig.height=5}
 DT::datatable(cc_data_cleaned_matched, extensions='Scroller', filter = "top", fillContainer = T, options = list(scrollX=TRUE, autoWidth=TRUE, scroller=TRUE, scrollY = '450px'))
 ```

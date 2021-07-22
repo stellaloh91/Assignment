@@ -95,7 +95,39 @@ The visualizations were designed make full use of RStudio's interactive plots su
 
 1) **Transaction volume overview by day**- We have decided to employ the use of a linked bar chart to reflect the volume of transactions across the 2 weeks for each location. Users can then select the location they want specific details on and the linked line chart will then provide the details on transaction volume across time.
 
-```{r, layout="l-body-outset", fig.width=5.5, fig.height=5, fig.cap="Bar Chart of loyalty card transaction volume per location cross-linked with line chart"}
+```{r, tidy.opts=list(width.cutoff=55),tidy=TRUE, layout="l-body-outset", fig.width=5.5, fig.height=5, fig.cap="Bar Chart of loyalty card transaction volume per location cross-linked with line chart"}
+##Volume from loyalty card dataset by date- linked
+
+loyalty_data_cleaned_grpcount <- loyalty_data_cleaned %>%
+  group_by(location, date) %>%
+  summarise(txn_count = n())
+
+shared_data <- SharedData$new(loyalty_data_cleaned_grpcount, key = ~location)
+
+loyalty_loc_vol_bar <- shared_data %>%
+  plot_ly() %>% 
+  group_by(location) %>%
+  summarise(txn_count = sum(txn_count)) %>%
+  arrange(desc(txn_count)) %>%
+  add_bars(x = ~txn_count, y = ~location, type = "bar", hoverinfo = "text", 
+          text = ~paste("Location:", location,
+                        "<br>Transaction Volume:", txn_count)) %>%
+  layout(title = "Loyalty card transaction Volume by Location", xaxis = list(title = "Transaction Volume", 
+         zeroline = FALSE), yaxis = list(title = "Location", zeroline = FALSE, categoryorder = "array", dtick= 1, categoryarray = ~txn_count))
+
+loyalty_loc_vol_line <- shared_data %>% 
+  plot_ly() %>%
+  add_lines(x = ~date, y = ~txn_count, hoverinfo = "text", 
+          text = ~paste("Location:", location,
+                        "<br>Date:", date,
+                        "<br>Transaction Volume:", txn_count)) %>%
+  layout(xaxis = list(title = "Date", showgrid = TRUE, showticklabels = TRUE), 
+         yaxis = list(title = "Transaction volume"))
+
+bscols(widths = c(14,14), loyalty_loc_vol_bar, loyalty_loc_vol_line)
+```
+
+```{r, tidy.opts=list(width.cutoff=55),tidy=TRUE, layout="l-body-outset", fig.width=5.5, fig.height=5, fig.cap="Bar Chart of loyalty card transaction volume per location cross-linked with line chart"}
 ##Volume from loyalty card dataset by date- linked
 
 library(crosstalk)
@@ -127,7 +159,7 @@ loyalty_loc_vol_line <- shared_data %>%
 bscols(widths = c(14,14), loyalty_loc_vol_bar, loyalty_loc_vol_line)
 ```
 
-```{r, layout="l-body-outset", fig.width=5.5, fig.height=5, fig.cap="Bar Chart of credit card transaction volume per location cross-linked with line chart"}
+```{r, tidy.opts=list(width.cutoff=55),tidy=TRUE, layout="l-body-outset", fig.width=5.5, fig.height=5, fig.cap="Bar Chart of credit card transaction volume per location cross-linked with line chart"}
 ##Volume from credit card dataset by date- linked
 
 shared_data_cc <- SharedData$new(cc_data_cleaned, key = ~location)
@@ -159,7 +191,7 @@ bscols(widths = c(14,14), cc_data_loc_vol_bar, cc_loc_vol_line)
 
 2) **Overview of transaction volume difference**- provide an overview of the difference in transaction volume across each location per day.
 
-```{r, layout="l-body-outset", fig.width=7.5, fig.height=5.5, fig.cap="Heatmap showing difference in transaction volume per location"}
+```{r, tidy.opts=list(width.cutoff=55),tidy=TRUE, layout="l-body-outset", fig.width=7.5, fig.height=5.5, fig.cap="Heatmap showing difference in transaction volume per location"}
 ##Difference in volume by day
 
 loyalty_data_count <- loyalty_data_cleaned %>%
@@ -201,7 +233,7 @@ txn_vol_difference_heatmap %>% layout(yaxis = a, xaxis = list(
 
 As the transaction time for credit cards is also provided, we have included an additional bar chart which reflects the volume per period of time in the selected location. This will provide more information to assess when the location is popular for each day of the week.
 
-```{r, fig.cap="Bar Chart of loyalty card transaction volume per location by day of week cross-linked with datatable"}
+```{r, tidy.opts=list(width.cutoff=60),tidy=TRUE, fig.cap="Bar Chart of loyalty card transaction volume per location by day of week cross-linked with datatable"}
 ##Loyalty card volume by day of week
 
 ##Preparing the data
@@ -238,7 +270,7 @@ bscols(widths = c(10,4),
 )
 ```
 
-```{r, fig.cap="Bar Chart of credit card transaction volume per location by day of week and timegroup, cross-linked with datatable"}
+```{r, tidy.opts=list(width.cutoff=55),tidy=TRUE, fig.cap="Bar Chart of credit card transaction volume per location by day of week and timegroup, cross-linked with datatable"}
 ## Credit card volume by day of week
 ## Loading data
 Sys.setlocale("LC_TIME", "English")
@@ -306,7 +338,7 @@ bscols(widths = c(10,4),
     - Interactive map- Clicking on any point in the trajectory allows us to see the CarID, day and timestamp of the respective point in the route.
     - Facet map- This allows us to visualize a single variable with many levels and arrange the plots in a more space efficient manner for easy comparison and analysis.
 
-```{r, fig.cap="Interactive map"}
+```{r, tidy.opts=list(width.cutoff=60),tidy=TRUE, fig.cap="Interactive map"}
 ##Plotting GPS paths
 gps_path_selected <- gps_path_cleaned %>%
   filter(id == 1, day == 6)
@@ -318,7 +350,7 @@ tm_shape(bgmap) +
   tm_lines(col= "red")
 ```
 
-```{r, layout="l-body-outset", fig.width=6, fig.height=20, fig.cap="Facet map"}
+```{r, tidy.opts=list(width.cutoff=60),tidy=TRUE, layout="l-body-outset", fig.width=6, fig.height=20, fig.cap="Facet map"}
 ##Facet map
 gps_path_selected <- gps_path_cleaned %>%
   filter(hour == 12)

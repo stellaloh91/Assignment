@@ -108,7 +108,7 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
   <!--radix_placeholder_rmarkdown_metadata-->
 
   <script type="text/json" id="radix-rmarkdown-metadata">
-  {"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["title","description","output"]}},"value":[{"type":"character","attributes":{},"value":["Limitations"]},{"type":"character","attributes":{},"value":["Details the limitations of using solely RMarkdown\n"]},{"type":"character","attributes":{},"value":["distill::distill_article"]}]}
+  {"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["title","description","output"]}},"value":[{"type":"character","attributes":{},"value":["Limitations"]},{"type":"character","attributes":{},"value":["Details the limitations of using solely RMarkdown\n"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["distill::distill_article"]}},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["toc","toc_float","toc_depth","self_contained"]}},"value":[{"type":"logical","attributes":{},"value":[true]},{"type":"logical","attributes":{},"value":[true]},{"type":"integer","attributes":{},"value":[3]},{"type":"logical","attributes":{},"value":[false]}]}]}]}
   </script>
   <!--/radix_placeholder_rmarkdown_metadata-->
   <!--radix_placeholder_navigation_in_header-->
@@ -2089,6 +2089,15 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 
 
 <div class="d-article">
+<div class="d-contents d-contents-float">
+<nav class="l-text toc figcaption" id="TOC">
+<h3>Contents</h3>
+<ul>
+<li><a href="#limitations-noted">Limitations noted</a></li>
+<li><a href="#next-steps">Next steps</a></li>
+</ul>
+</nav>
+</div>
 <style>
 
 body{
@@ -2099,8 +2108,8 @@ body{
 <h3 id="limitations-noted">Limitations noted</h3>
 <p>We have noted the following limitations in performing the analysis using solely RMarkdown:</p>
 <ol type="1">
-<li></li>
-<li>Crosstalk is currently not compatible with visNetwork, an R package for interactive network visualization, Hence, on selecting a location in the network graph, we will have to manually filter a datatable for the location to observe the time each employee visits this location.</li>
+<li><p>Users will have to manually update the code to produce graphs of different CarIDs to observe their trajectories. This may be difficult for users who have no coding experience.</p></li>
+<li><p>Crosstalk is currently not compatible with visNetwork, an R package for interactive network visualization, Hence, on selecting a location in the network graph, we will have to manually filter a datatable for the location to observe the time each employee visits this location, in order to determine whether employees have crossed paths at this location.</p></li>
 </ol>
 <h3 id="next-steps">Next steps</h3>
 <p>Given the limitations noted above, we will be incorporating RShiny to enhance the interactivity of the visualizations.</p>
