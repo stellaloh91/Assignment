@@ -9,12 +9,44 @@ output:
     toc_depth: 3
     self_contained: false
 ---
-<style>
+<style type="text/css">
 
-body{
+body{ /* Body  */
+  font-family: "helvetica;
   background-color: #EBEDEF;
-  font-family:helvetica;
-  font-size: 20pt
+  font-size: 15px;
+  }
+td {  /* Table  */
+  font-family: "helvetica;
+  font-size: 8px;
+}
+h1.title {
+  font-family: "helvetica;
+  font-size: 38px;
+  color: #08306b;
+}
+h1 { /* Header 1 */
+  font-family: "helvetica;
+  font-size: 30px;
+  color: #08306b;
+}
+h2 { /* Header 2 */
+  font-family: "helvetica;
+  font-size: 25px;
+  color: #08306b;
+}
+h3 { /* Header 3 */
+  font-size: 20px;
+  font-family: "helvetica;
+  color: #08306b;
+}
+code.r{ /* Code block */
+  font-family: "helvetica;
+  font-size: 12px;
+}
+pre { /* Code block - determines code spacing between lines */
+  font-size: 14px;
+  overflow-x: auto;
 }
 </style>
 
@@ -57,15 +89,18 @@ The data provided consists of four CSV files, a tourist map and geospatial data 
 +-----------------+---------------------------------------------------------------------------------+
 | car-assignments | Name, employment type and employment title of each employee assigned to a carID |
 +-----------------+---------------------------------------------------------------------------------+
-| gps             | Latitude and longitude of each carID for each timestamp                         |
+| gps             | Latitude and longitude of each carID for each timestamp (when car is moving)    |
 +-----------------+---------------------------------------------------------------------------------+
 | geospatial data | Geospatial data files, including shapefiles                                     |
 +-----------------+---------------------------------------------------------------------------------+
 
 We note that there are some issues with the imported data:
-    - Timestamp data is presented in character instead of datetime format
-    - last4ccnum is in double format instead of factor
-    - ID and CarID are in double format instead of factor
+
+- Timestamp data is presented in character instead of datetime format
+
+- last4ccnum is in double format instead of factor
+
+- ID and CarID are in double format instead of factor
 
 We will correct the issues above in the next section.
 

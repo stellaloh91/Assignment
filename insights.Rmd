@@ -49,15 +49,19 @@ Based on the interactive charts, we noted that the top 3 most popular locations 
 2) Hippokampos- Most popular on 01/16/2014  with 17 transactions, followed by 01/06/2014 (16), and 01/09/2014 with 14 transactions.
 3) Guy's Gyros- Most popular on 01/09/2014 and 01/13/2014 with 15 transactions, followed by 01/10/2014 and 01/17/2014 with 14 transactions each day, and 01/15/2014 and 01/16/2014 (13) being the third most popular days by transaction volume.
 
-```{r, tidy.opts=list(width.cutoff=55),tidy=TRUE, layout="l-body-outset", fig.width=5.5, fig.height=5}
+```{r, tidy.opts=list(width.cutoff=55),tidy=TRUE, layout="l-body-outset", fig.width=5.5, fig.height=5, fig.cap="Bar Chart of loyalty card transaction volume per location cross-linked with line chart"}
 ##Volume from loyalty card dataset by date- linked
 
-shared_data <- SharedData$new(loyalty_data_cleaned, key = ~location)
+loyalty_data_cleaned_grpcount <- loyalty_data_cleaned %>%
+  group_by(location, date) %>%
+  summarise(txn_count = n())
+
+shared_data <- SharedData$new(loyalty_data_cleaned_grpcount, key = ~location)
 
 loyalty_loc_vol_bar <- shared_data %>%
   plot_ly() %>% 
   group_by(location) %>%
-  summarise(txn_count = n()) %>%
+  summarise(txn_count = sum(txn_count)) %>%
   arrange(desc(txn_count)) %>%
   add_bars(x = ~txn_count, y = ~location, type = "bar", hoverinfo = "text", 
           text = ~paste("Location:", location,
@@ -67,8 +71,6 @@ loyalty_loc_vol_bar <- shared_data %>%
 
 loyalty_loc_vol_line <- shared_data %>% 
   plot_ly() %>%
-  group_by(location, date) %>%
-  summarise(txn_count = n()) %>%
   add_lines(x = ~date, y = ~txn_count, hoverinfo = "text", 
           text = ~paste("Location:", location,
                         "<br>Date:", date,
@@ -76,18 +78,22 @@ loyalty_loc_vol_line <- shared_data %>%
   layout(xaxis = list(title = "Date", showgrid = TRUE, showticklabels = TRUE), 
          yaxis = list(title = "Transaction volume"))
 
-bscols(widths = c(14,14), loyalty_loc_vol_bar, loyalty_loc_vol_line)
+bscols(widths = c(12,12), loyalty_loc_vol_bar, loyalty_loc_vol_line)
 ```
 
-```{r, tidy.opts=list(width.cutoff=55),tidy=TRUE, layout="l-body-outset", fig.width=5.5, fig.height=5}
+```{r, tidy.opts=list(width.cutoff=55),tidy=TRUE, layout="l-body-outset", fig.width=5.5, fig.height=5, fig.cap="Bar Chart of credit card transaction volume per location cross-linked with line chart"}
 ##Volume from credit card dataset by date- linked
 
-shared_data_cc <- SharedData$new(cc_data_cleaned, key = ~location)
+cc_data_cleaned_grpcount <- cc_data_cleaned %>%
+  group_by(location, date) %>%
+  summarise(txn_count = n())
+
+shared_data_cc <- SharedData$new(cc_data_cleaned_grpcount, key = ~location)
 
 cc_data_loc_vol_bar <- shared_data_cc %>%
   plot_ly() %>% 
   group_by(location) %>%
-  summarise(txn_count = n()) %>%
+  summarise(txn_count = sum(txn_count)) %>%
   arrange(desc(txn_count)) %>%
   add_bars(x = ~txn_count, y = ~location, type = "bar", hoverinfo = "text", 
           text = ~paste("Location:", location,
@@ -97,8 +103,6 @@ cc_data_loc_vol_bar <- shared_data_cc %>%
 
 cc_loc_vol_line <- shared_data_cc %>% 
   plot_ly() %>%
-  group_by(location, date) %>%
-  summarise(txn_count = n()) %>%
   add_lines(x = ~date, y = ~txn_count, hoverinfo = "text", 
           text = ~paste("Location:", location,
                         "<br>Date:", date,
@@ -106,7 +110,7 @@ cc_loc_vol_line <- shared_data_cc %>%
   layout(xaxis = list(title = "Date", showgrid = TRUE, showticklabels = TRUE), 
          yaxis = list(title = "Transaction volume"))
 
-bscols(widths = c(14,14), cc_data_loc_vol_bar, cc_loc_vol_line)
+bscols(widths = c(12,12), cc_data_loc_vol_bar, cc_loc_vol_line)
 ```
 
 Just by comparing the top 3 locations and their popular days, we noted that there are differences in the transaction count per day for each location on the loyalty card and credit card. In particular, there were days where loyalty card transactions were higher than credit card transactions. This is unexpected as loyalty card is used to collect discounts and rewards and cannot be used for payment. Hence one would expect both volumes to either be the same or for credit card volumes (actual purchase) to be higher than loyalty card volumes (in cases where the employee may have forgotten to present loyalty card for rewards/ discounts). The difference in volumes each day across both cards are illustrated below. The darker the blue hue, the greater the loyalty data transaction volume exceeds credit card transaction volume.
@@ -1055,7 +1059,7 @@ The following employees have been visiting a similar location near Spetson Park 
     - Isia Vann (Perimeter Control, CarID 16) also had a similar trajectory as Loreto Bodrogi. She left her house at 2301 on 01/06/2014 and arrived at the area near Spetson Park at 2309. She then remained in the same area and left only at 0730 and drove directly to Gastech without making any other stops. 
     - Both Loreto and Isia's paths would have crossed on their trip to the area near Spetson Park on 01/07/2014. They also left around the same time. They both took the same route to Gastech although Loreto Bodrogi made a transaction at Brewed Awakenings.
 
-```{r, tidy.opts=list(width.cutoff=60),tidy=TRUE, layout="l-body-outset", fig.width=6, fig.height=7.5, fig.cap="Facet graph of CarID 10 at 1800 (afterwork hours)"}
+```{r, tidy.opts=list(width.cutoff=60),tidy=TRUE, fig.cap="Facet graph of CarID 10 at 1800 (afterwork hours)"}
 ##Facet map
 gps_path_selected <- gps_path_cleaned %>%
   filter(id == 10, hour == 18)
