@@ -35,7 +35,7 @@ Given the limitations noted above, we will be incorporating RShiny to enhance th
 
 Some benefits of RShiny include:
 
-1) End users need not be adept in programming langauges to be able to utilize the interactivity of the applications and modify the desired criteria for data visualization.
+1) End users need not be adept in programming langauges to be able to utilize the interactivity of the applications and modify the desired criteria for data visualization. Reactive features of Shiny and its functions support reactive flow.
 
 2) Allows one to build and share highly interactive web-enabled applications without having to invest significant
 time and effort to master core web design.[(tskam, 2021)]( technology(https://isss608.netlify.app/lesson/lesson11/lesson11-intro_shiny#1).

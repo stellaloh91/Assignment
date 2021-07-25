@@ -46,8 +46,9 @@ code.r{ /* Code block */
 }
 pre { /* Code block - determines code spacing between lines */
   font-size: 14px;
-  overflow-x: auto;
 }
+}
+
 </style>
 
 ```{r setup, include=FALSE, layout="l-body-outset"}
@@ -180,12 +181,15 @@ The dataset is now ready for data exploration.
 ## Explore the data
 
 We will first perform exploratory data analysis, employing visualization to aid in the exploration of the following areas:
-    - Missing values
-    - Distribution
-    - Outliers
+
+- Missing values
+
+- Distribution
+
+- Outliers
 
 ### Missing values
-```{r, tidy.opts=list(width.cutoff=55),tidy=TRUE, layout="l-body-outset", fig.width=5.5, fig.height=5, fig.cap="Loyalty card- Percentage of missing values"}
+```{r, tidy.opts=list(width.cutoff=55),tidy=TRUE, layout="l-body-outset", fig.width=5.5, fig.height=4, fig.cap="Loyalty card- Percentage of missing values"}
 ##loyalty card
 missing.values_loyalty <- loyalty_data_cleaned %>%
   gather(key = "key", value = "val") %>%
@@ -196,25 +200,28 @@ missing.values_loyalty <- loyalty_data_cleaned %>%
   summarise(num.isna = n()) %>%
   mutate(pct = num.isna / total * 100)
 
-levels_loyalty <- (missing.values_loyalty %>% filter(isna == T) %>% arrange(desc(pct)))$key
+levels_loyalty <- (missing.values_loyalty %>% 
+                     filter(isna == TRUE) %>% 
+                     arrange(desc(pct)))$key
 
 percentage.plot_loyalty <- missing.values_loyalty %>%
       ggplot() +
         geom_bar(aes(x = reorder(key, desc(pct)), 
-                     y = pct, fill=isna, text= sprintf("Percent: %s", scales::percent(pct, scale = 1, accuracy = .01))), 
+                     y = pct, fill=isna, 
+                     text= sprintf("Percent: %s", scales::percent(pct, scale = 1, accuracy = .01))), 
                  stat = 'identity', alpha=0.8) +
       scale_x_discrete(limits = NULL) +
       scale_fill_manual(name = "", 
-                        values = c('steelblue', 'tomato3'), labels = c("Present", "Missing")) +
+                        values = c('steelblue', 'tomato3'), 
+                        labels = c("Present", "Missing")) +
       coord_flip() +
-      labs(title = "Percentage of missing values- loyalty card data", x =
-             'Variable', y = "% of missing values") + 
-      theme(legend.position = "none") 
+      labs(title = "Percentage of missing values- loyalty card data", 
+           x = 'Variable', y = "% of missing values") 
 
-ggplotly(percentage.plot_loyalty, tooltip = c("text"))
+percentage.plot_loyalty
 ```
 
-```{r, tidy.opts=list(width.cutoff=55),tidy=TRUE, layout="l-body-outset", fig.width=5.5, fig.height=5, fig.cap="Credit card- Percentage of missing values"}
+```{r, tidy.opts=list(width.cutoff=55),tidy=TRUE, layout="l-body-outset", fig.width=6.5, fig.height=5, fig.cap="Credit card- Percentage of missing values"}
 ##credit card
 missing.values_cc <- cc_data_cleaned %>%
   gather(key = "key", value = "val") %>%
@@ -237,13 +244,12 @@ percentage.plot_cc <- missing.values_cc %>%
                         values = c('steelblue', 'tomato3'), labels = c("Present", "Missing")) +
       coord_flip() +
       labs(title = "Percentage of missing values- credit card data", x =
-             'Variable', y = "% of missing values") + 
-      theme(legend.position = "none") 
+             'Variable', y = "% of missing values")
 
-ggplotly(percentage.plot_cc, tooltip = c("text"))
+percentage.plot_cc
 ```
 
-```{r, tidy.opts=list(width.cutoff=50),tidy=TRUE, layout="l-body-outset", fig.width=5.5, fig.height=5, fig.cap="Location data- Percentage of missing values"}
+```{r, tidy.opts=list(width.cutoff=35),tidy=TRUE, layout="l-body-outset", fig.width=9, fig.height=5, fig.cap="Location data- Percentage of missing values"}
 ##location data
 missing.values_gps_carid <- location_carid_join %>%
   gather(key = "key", value = "val") %>%
@@ -262,19 +268,19 @@ percentage.plot_gps_carid <- missing.values_gps_carid  %>%
       scale_x_discrete(limits = NULL) +
       scale_fill_manual(name = "", values = c('steelblue', 'tomato3'), labels = c("Present", "Missing")) +
       coord_flip() +
-      labs(title = "Percentage of missing values- location data", x =
-             'Variable', y = "% of missing values") + 
-      theme(legend.position = "none") 
+      labs(title = "Percentage of missing values- location data", 
+           x = 'Variable', 
+           y = "% of missing values") 
 
-ggplotly(percentage.plot_gps_carid, tooltip = c("text"))
+percentage.plot_gps_carid
 ```
 
 From the above plots, we note that there is no missing values in both the loyalty and credit card data.
 However, there appears to be missing values in the location data provided. 
 
-From the above plot, LastName, FirstName, CurrentEmploymentType and CurrentEmploymentTitle have the highest percentage of missing values, followed other variables in the combined GPS and car assignment data dataset. On further investigation, we note that this is because there seems to be employees with no specific cars assigned and cars which are not assigned to a specific employee. This results in the joined tables having empty values.
+From the above plot, LastName, FirstName, CurrentEmploymentType and CurrentEmploymentTitle have the highest percentage of missing values, followed other variables in the combined GPS and car assignment dataset. On further investigation, we note that this is because there seems to be employees with no specific cars assigned and cars which are not assigned to a specific employee. This results in the joined tables having empty values.
 
-```{r, tidy.opts=list(width.cutoff=60),tidy=TRUE, fig.cap="Table: Employees with no assigned car"}
+```{r, tidy.opts=list(width.cutoff=60),tidy=TRUE, fig.cap="Employees with no assigned car"}
 ##Employees with no cars assigned
 missing_carid <- location_carid_join  %>%
   group_by(id) %>%
@@ -284,7 +290,7 @@ missing_carid = subset(missing_carid, select = -c(lat,long,date,day,hour))
 DT::datatable(missing_carid, filter = 'top', options = list(autoWidth = TRUE, scrollX = TRUE))
 ```
 
-```{r, tidy.opts=list(width.cutoff=55),tidy=TRUE, fig.cap="Cars with no assigned employees"}
+```{r, tidy.opts=list(width.cutoff=30),tidy=TRUE, fig.cap="Cars with no assigned employees"}
 ##Cars not assigned to employees
 missing_empname <- location_carid_join  %>%
   group_by(id, FirstName, LastName) %>%
@@ -329,7 +335,7 @@ ggplotly(check_distribution_cc)
 
 From the above distributions, we can see that the range of values differ greatly. In order to observe the distributions clearly, we will re-scale the data using log transformation. 
 
-```{r, tidy.opts=list(width.cutoff=55),tidy=TRUE, fig.cap="Log transformed distribution of loyalty card spending"}
+```{r, tidy.opts=list(width.cutoff=20),tidy=TRUE, fig.cap="Log transformed distribution of loyalty card spending"}
 ##loyalty card
 check_distribution_loyalty_log <- loyalty_data %>%
   ggplot(aes(x=price)) +
@@ -338,12 +344,12 @@ check_distribution_loyalty_log <- loyalty_data %>%
   theme(panel.border = element_rect(colour="grey60", fill = NA),
         strip.background = element_rect(fill = "grey80")) + 
   scale_x_log10(limits = c(1,1e4)) +
-  labs(title = "Distribution of loyalty card spending after log transformation", x = 'price (log scale)', y = "density")
+  labs(title = "Log transformed distribution of loyalty card spending after log transformation", x = 'price', y = "density")
 
 check_distribution_loyalty_log
 ```
 
-```{r, tidy.opts=list(width.cutoff=60),tidy=TRUE, fig.cap="Log transformed distribution of credit card spending"}
+```{r, tidy.opts=list(width.cutoff=20),tidy=TRUE, fig.cap="Log transformed distribution of credit card spending"}
 ##credit card
 check_distribution_cc_log <- cc_data %>%
   ggplot(aes(x=price)) +
@@ -352,14 +358,16 @@ check_distribution_cc_log <- cc_data %>%
   theme(panel.border = element_rect(colour="grey60", fill = NA),
         strip.background = element_rect(fill = "grey80")) + 
   scale_x_log10(limits = c(1,1e4)) +
-  labs(title = "Distribution of credit card spending after log transformation", x = 'price (log scale)', y = "density")
+  labs(title = "Log transformed distribution of credit card spending after log transformation", x = 'price', y = "density")
 
 check_distribution_cc_log
 ```
 
-The distributions of the log-transformed variables now approximates to the normal distribution. From the above distributions, we can see that the distributions are similar for both loyalty and credit card transactions.
+The distributions of the log-transformed variables now approximates to the normal distribution. From the above distributions, we can see that the distributions are similar for both loyalty and credit card transactions, with the bulk of transactions between \$10 and \$100.
 
-We have also plotted the total spent per day in each store for both loyalty and credit card data. As seen in the figures below, the spending differs greatly between stores (note free scales). However, total spending per day from credit card and loyalty card data follows the same trending.
+We have also plotted the total spent per day in each store for both loyalty and credit card data. As seen in the figures below, the spending differs greatly between stores (note free scales). Furthermore, we also note differences in the daily spending for each store between loyalty and credit cards. This is unexpected as loyalty card is used to collect discounts and rewards and hence one would expect transaction amounts to be the same between both cards. Further investigation is warranted. 
+
+From the charts below, we noted that there was an additional location for credit card transactions compared to loyalty card transactions- Daily Dealz.
 
 ```{r, tidy.opts=list(width.cutoff=60),tidy=TRUE, layout="l-screen-inset shaded", fig.height=10, fig.cap="Loyalty card spending per store"}
 ##loyalty card
@@ -390,7 +398,7 @@ check_distribution_cc_location <- summ_cc_data %>%
   ggplot() +
   geom_bar(stat = "identity", aes(x=date, y = total_spent, group = 1)) +
   facet_wrap(~location, nrow = 11, ncol = 4, scales='free_y') +
-  ggtitle("Credit card card spending per store") +
+  ggtitle("Credit card spending per store") +
   scale_x_date(date_labels = "%b %d",date_breaks = "2 days") +
   theme_minimal() +
   theme(panel.border = element_rect(colour="grey60", fill = NA),
@@ -398,7 +406,6 @@ check_distribution_cc_location <- summ_cc_data %>%
   
 ggplotly(check_distribution_cc_location)
 ```
-From the charts above, we noted that there was an additional location for credit card transactions compared to loyalty card transactions- Daily Dealz. There seems to be only one transaction made in this location over the two weeks.
 
 ### Outliers
 
@@ -416,7 +423,7 @@ boxplot_loyalty_plot <- plot_ly(height = 600, d, y = ~location, x = ~price) %>%
   layout(xaxis = list(title = "Distribution of loyalty card spending (log scale)", tickangle = 0, ticks = "outside", ticklen = 2, tickwidth = 2, tickcolor = toRGB("black"),showgrid = T, showticklabels = TRUE, zeroline = F,  showline = T, type = "log", range = c(0, 4.1)), margin = m, yaxis = list(dtick= 1)) 
 
 gg <- highlight(ggplotly(boxplot_loyalty_plot), "plotly_selected")
-crosstalk::bscols(gg,DT::datatable(d) %>% 
+crosstalk::bscols(gg,DT::datatable(d, filter = 'top') %>% 
                     formatDate(1, method = 'toLocaleDateString'), widths = 12)
 ```
 
@@ -427,11 +434,12 @@ d1 <- highlight_key(cc_data_cleaned)
 
 boxplot_cc_plot <- plot_ly(height = 600, d1, y = ~location, x = ~price) %>%
   add_boxplot(hoverinfo = "text", hovertext = ~paste("Date:", date,"<br>",
+                                                     "Location:", location, "<br>",
                                                     "Amount:", price)) %>%
   layout(xaxis = list(title = "Distribution of credit card card spending (log scale)", tickangle = 0, ticks = "outside", ticklen = 2, tickwidth = 2, tickcolor = toRGB("black"), showgrid = T, showticklabels = TRUE, zeroline = F,  showline = T, type = "log", range = c(0, 4.1)), margin = m, yaxis = list(dtick= 1)) 
 
 gg <- highlight(ggplotly(boxplot_cc_plot), "plotly_selected")
-crosstalk::bscols(gg,DT::datatable(d1), widths = 12)
+crosstalk::bscols(gg,DT::datatable(d1, filter = 'top'), widths = 12)
 ```
 
-Using the interactive plots above, we are able to select the outliers and this filters the linked datatable for the relevant transaction, giving additional insight such as the card number. We note that there seems to be outliers, the most notable being in Frydos Autosupply n'More where there was a transaction for $10,000 on 01/13/2014 by card ending with 9551. More notably, there was no corresponding transaction on the loyalty card.
+Using the interactive plots above, we are able to select the outliers and this filters the linked datatable for the relevant transaction, giving additional insight such as the card number. We note that there seems to be several outliers, the most notable being in Frydos Autosupply n'More where there was a transaction for $10,000 on 01/13/2014 by card ending with 9551. There was no corresponding transaction of similar amount on the loyalty card.

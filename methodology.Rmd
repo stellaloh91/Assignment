@@ -9,11 +9,51 @@ output:
     toc_depth: 3
     self_contained: false
 ---
-<style>
+<style type="text/css">
 
-body{
+body{ /* Body  */
+  font-family: "helvetica;
   background-color: #EBEDEF;
-  font-family:helvetica;
+  font-size: 15px;
+  }
+td {  /* Table  */
+  font-family: "helvetica;
+  font-size: 8px;
+}
+h1.title {
+  font-family: "helvetica;
+  font-size: 38px;
+  color: #08306b;
+}
+h1 { /* Header 1 */
+  font-family: "helvetica;
+  font-size: 30px;
+  color: #08306b;
+}
+h2 { /* Header 2 */
+  font-family: "helvetica;
+  font-size: 25px;
+  color: #08306b;
+}
+h3 { /* Header 3 */
+  font-size: 20px;
+  font-family: "helvetica;
+  color: #08306b;
+}
+code.r{ /* Code block */
+  font-family: "helvetica;
+  font-size: 12px;
+}
+pre { /* Code block - determines code spacing between lines */
+  font-size: 14px;
+  
+}
+pre code, pre, code {
+  white-space: pre !important;
+  overflow-x: scroll !important;
+  word-break: keep-all !important;
+  word-wrap: initial !important;
+}
 }
 </style>
 
@@ -27,11 +67,11 @@ knitr::opts_chunk$set(fig.retina = 2,
 
 ## Methodology and Design
 
-In this section, we will explore the methodology to analyze the data and analyze various packages required to build the plots. The criteria for selection of plots are as follows:
-    - Level of customization 
-    - Ease of use and implementation of customization 
-    - Ease of understanding and interpretation of the plot- both clarity and aesthetic
-    - Interactivity
+In this section, we will explore the methodology to analyze the data, and assess the various packages required to build the plots. The criteria for selection of plots are as follows:
+- Level of customization 
+- Ease of use and implementation of customization 
+- Ease of understanding and interpretation of the plot- both clarity and aesthetic
+- Interactivity
 
 ### Methodology
 
@@ -46,11 +86,11 @@ In this section, we will explore the methodology to analyze the data and analyze
 3) Time information is provided for credit card transactions but not loyalty card transactions. Nonetheless, we will extract the date from datetime information provided in credit card dataset so that we can analyze both datasets across the common dates.
 
 ```{r}
-glimpse(loyalty_data)
+glimpse(loyalty_data_cleaned)
 ```
 
 ```{r}
-glimpse(cc_data)
+glimpse(cc_data_cleaned)
 ```
 
 #### GeoVisual Analysis
@@ -83,17 +123,17 @@ Bipartite graphs are used as we are provided with credit card information showin
 
 3) **Interpreting the connections**
 
-Due to the limitations in RMarkdown, crosstalk is not available for the VisNetwork package used to visualize networks. The network graph shows connections between an employee and the location he/she visits based on the credit card transaction data provided. However, it does not reflect when these visits occur and if various employees may have crossed paths due to transactions at the same location during the same time period. Hence we will utilize both the interactive network graph and an interactive datatable to get further details on these transactions such as the time they occurred to assess if the employees may have crossed paths.
+Due to the limitations in RMarkdown, crosstalk is not available for the VisNetwork package used to visualize networks. The network graph shows connections between an employee and the location he/she visits based on the credit card transaction data provided. However, it does not reflect when these visits occur and if various employees may have crossed paths due to transactions at the same location during the same time period. Hence we will utilize both the interactive network graph and an interactive datatable to get further details on these transactions, such as the time they occurred, to assess if the employees may have crossed paths.
 
 #### Overall visualization design concepts
 
-The visualizations were designed make full use of RStudio's interactive plots such that we can provide a tool for the users to customize their analysis as much as possible. The users are able to filter the different input parameters (such as location for exploratory visualization and by department for network graph) and utilize the maps tooltips function and interactive datatables to obtain greater detail on the visualizations. This will be explained in greater details in the plot design section.
+The visualizations were designed make full use of RStudio's interactive plots such that we can provide a tool for the users to customize their analysis as much as possible. The users are able to filter the different input parameters (such as location for exploratory visualization, or by department for network graph) and utilize the maps' tooltips function and interactive datatables to obtain greater detail on the visualizations. This will be explained in greater detail in the plot design section.
 
 ### Plot Design
 
 #### Exploratory Visualization
 
-1) **Transaction volume overview by day**- We have decided to employ the use of a linked bar chart to reflect the volume of transactions across the 2 weeks for each location. Users can then select the location they want specific details on and the linked line chart will then provide the details on transaction volume across time.
+1) **Transaction volume overview by day**- We have decided to employ the use of a bar chart to reflect the volume of transactions across the 2 weeks for each location. Users can then select the location they want specific details on and the linked line chart will then provide the details on transaction volume across time.
 
 ```{r, tidy.opts=list(width.cutoff=55),tidy=TRUE, layout="l-body-outset", fig.width=5.5, fig.height=5, fig.cap="Bar Chart of loyalty card transaction volume per location cross-linked with line chart"}
 ##Volume from loyalty card dataset by date- linked
@@ -121,11 +161,13 @@ loyalty_loc_vol_line <- shared_data %>%
           text = ~paste("Location:", location,
                         "<br>Date:", date,
                         "<br>Transaction Volume:", txn_count)) %>%
-  layout(xaxis = list(title = "Date", showgrid = TRUE, showticklabels = TRUE), 
+  layout(title = "Loyalty card transaction Volume by Location across dates", xaxis = list(title = "Date", showgrid = TRUE, showticklabels = TRUE, type = 'date',
+                      tickangle = 0, tickformat = "%d%b"), 
          yaxis = list(title = "Transaction volume"))
 
 bscols(widths = c(12,12), loyalty_loc_vol_bar, loyalty_loc_vol_line)
 ```
+
 
 ```{r, tidy.opts=list(width.cutoff=55),tidy=TRUE, layout="l-body-outset", fig.width=5.5, fig.height=5, fig.cap="Bar Chart of credit card transaction volume per location cross-linked with line chart"}
 ##Volume from credit card dataset by date- linked
@@ -153,7 +195,8 @@ cc_loc_vol_line <- shared_data_cc %>%
           text = ~paste("Location:", location,
                         "<br>Date:", date,
                         "<br>Transaction Volume:", txn_count)) %>%
-  layout(xaxis = list(title = "Date", showgrid = TRUE, showticklabels = TRUE), 
+  layout(title = "Credit card transaction Volume by Location across dates", xaxis = list(title = "Date", showgrid = TRUE, showticklabels = TRUE, type = 'date',
+                      tickangle = 0, tickformat = "%d%b"), 
          yaxis = list(title = "Transaction volume"))
 
 bscols(widths = c(12,12), cc_data_loc_vol_bar, cc_loc_vol_line)
@@ -161,7 +204,7 @@ bscols(widths = c(12,12), cc_data_loc_vol_bar, cc_loc_vol_line)
 
 2) **Overview of transaction volume difference**- provide an overview of the difference in transaction volume across each location per day.
 
-```{r, tidy.opts=list(width.cutoff=55),tidy=TRUE, layout="l-body-outset", fig.width=7.5, fig.height=5.5, fig.cap="Heatmap showing difference in transaction volume per location"}
+```{r, tidy.opts=list(width.cutoff=40),tidy=TRUE, layout="l-body-outset", fig.width=7.5, fig.height=5.5, fig.cap="Heatmap showing difference in transaction volume per location"}
 ##Difference in volume by day
 
 loyalty_data_count <- loyalty_data_cleaned %>%
@@ -181,7 +224,7 @@ count_loyalty_cc_comb <- loyalty_data_count %>%
   mutate(difference_vol = loyalty_card_txncount - credit_card_txncount) 
 
 a <- list(
-  title = "Difference in volume per day by location",
+  title = "Difference in volume per day by location<br>(loyalty card vol - credit card vol)",
   showticklabels = TRUE,
   dtick = 1
 )
@@ -191,7 +234,7 @@ txn_vol_difference_heatmap <- count_loyalty_cc_comb %>%
           text = ~paste("Date:", date,
                         "<br> Location:", location,
                         "<br> Vol_Diference:", difference_vol))
-txn_vol_difference_heatmap %>% layout(yaxis = a, xaxis = list(
+txn_vol_difference_heatmap %>% layout(title = "Difference in transaction volume by Location across dates", yaxis = a, xaxis = list(
   dtick = "86400000.0",
   type = 'date',
   title = "Date",
@@ -199,11 +242,10 @@ txn_vol_difference_heatmap %>% layout(yaxis = a, xaxis = list(
   tickformat = "%d%b"), margin = m, plot_bgcolor="#bdbdbd")
 ```
 
-3) **Transaction volume overview by day of week**- Similar to 1 above, We have decided to employ the use of a linked bar chart to reflect the volume of transactions by each day of the week for each location. Users can use the interactive filter to select the location they want specific details on and the linked bar chart will then provide the visualization on transaction volume across day of week. The datatable will also be filtered for the relevant location to provide further details like date and price of transaction.
-
+3) **Transaction volume overview by day of week**- Similar to 1 above, We have decided to employ the use of a linked chart to reflect the volume of transactions by each day of the week for each location. Users can use the interactive filter to select the location they want specific details on and the linked bar chart will then provide the visualization on transaction volume across day of week. The datatable will also be filtered for the relevant location to provide further details like date and price of transaction.<br>
 As the transaction time for credit cards is also provided, we have included an additional bar chart which reflects the volume per period of time in the selected location. This will provide more information to assess when the location is popular for each day of the week.
 
-```{r, tidy.opts=list(width.cutoff=60),tidy=TRUE, fig.cap="Bar Chart of loyalty card transaction volume per location by day of week cross-linked with datatable"}
+```{r, tidy.opts=list(width.cutoff=30),tidy=TRUE, fig.cap="Bar Chart of loyalty card transaction volume per location by day of week cross-linked with datatable"}
 ##Loyalty card volume by day of week
 
 ##Preparing the data
@@ -224,7 +266,7 @@ loyalty_wkday_vol <- shared_data_loyalty %>%
   add_trace(x = ~weekday, y = ~transaction, color = ~location, type = 'bar',hoverinfo = 'text',
             hovertext  = ~paste("<br> Day_of_week:", weekday,
                           "<br> Transaction Volume:", transaction)) %>%
-  layout(xaxis = list(title = "Day_of_week", 
+  layout(title = "Loyalty card transaction volume across day of week", xaxis = list(title = "Day_of_week", 
                         type = "factor",
                         categoryorder = "factor",
                         categoryarray = loyalty_data_cleaned$weekday[order(loyalty_data_cleaned[['daynumber']])],
@@ -235,15 +277,18 @@ loyalty_wkday_vol <- shared_data_loyalty %>%
 bscols(widths = c(10,4),
   list(
     filter_select("location", "Please Specify the location", shared_data_loyalty, group =  ~location, multiple = F),
-    datatable(shared_data_loyalty) %>% formatDate(1, method = 'toLocaleDateString')),
-  loyalty_wkday_vol
+    loyalty_wkday_vol,
+    datatable(shared_data_loyalty) %>% formatDate(1, method = 'toLocaleDateString'))
 )
 ```
 
-```{r, tidy.opts=list(width.cutoff=55),tidy=TRUE, fig.cap="Bar Chart of credit card transaction volume per location by day of week and timegroup, cross-linked with datatable"}
-## Credit card volume by day of week
+```{r, include=FALSE}
 ## Loading data
 Sys.setlocale("LC_TIME", "English")
+```
+
+```{r, tidy.opts=list(width.cutoff=30),tidy=TRUE, fig.cap="Bar Chart of credit card transaction volume per location by day of week and timegroup, cross-linked with datatable"}
+## Credit card volume by day of week
 ## Preparing the data
 cc_data_cleaned$daynumber = lubridate::wday(cc_data_cleaned$timestamp, week_start = 1)
 cc_data_cleaned$weekday = factor(cc_data_cleaned$weekday, levels= c("Sunday", "Monday", 
@@ -269,7 +314,7 @@ cc_wkday_vol <- shared_data %>%
   add_trace(x = ~weekday, y = ~transaction, color = ~location, type = 'bar',hoverinfo = 'text',
             hovertext  = ~paste("<br> Day_of_week:", weekday,
                           "<br> Transaction Volume:", transaction)) %>%
-  layout(xaxis = list(title = "Day_of_week", 
+  layout(title = "Credit card transaction volume across day of week", xaxis = list(title = "Day_of_week", 
                         type = "factor",
                         categoryorder = "factor",
                         categoryarray = cc_data_cleaned$weekday[order(cc_data_cleaned[['daynumber']])],
@@ -284,7 +329,7 @@ cc_timegroup_vol <-shared_data %>%
   add_trace(x = ~weekday, y = ~transaction, color = ~timegroup, type = 'bar',hoverinfo = 'text',
             hovertext  = ~paste("<br> Time:", timegroup,
                                 "<br>Transaction Volume:", transaction)) %>%
-  layout(xaxis = list(title = "Time",  type = "factor",
+  layout(title = "Credit card transaction volume at each timegroup across day of week", xaxis = list(title = "Time",  type = "factor",
                       categoryorder = "factor",
                       categoryarray = cc_data_cleaned$weekday[order(cc_data_cleaned[['daynumber']])],
                       showgrid = TRUE,
@@ -317,32 +362,33 @@ tmap_mode("view")
 tm_shape(bgmap) +
   tm_rgb(bgmap, r = 1, g = 2, b = 3, alpha = NA, saturation = 1, interpolate = TRUE, max.value = 255) +
   tm_shape(gps_path_selected) +
-  tm_lines(col= "red")
+  tm_lines(col= "red") +
+  tm_layout(title="Interactive graph of CarID 1 on 01/06/2014")
 ```
 
-```{r, tidy.opts=list(width.cutoff=60),tidy=TRUE, layout="l-body-outset", fig.width=6, fig.height=20, fig.cap="Facet map"}
+```{r, tidy.opts=list(width.cutoff=60),tidy=TRUE, layout="l-body-outset", fig.width=6, fig.height=10, fig.cap="Facet map"}
 ##Facet map
 gps_path_selected <- gps_path_cleaned %>%
-  filter(hour == 12)
+  filter(id == 1)
   
 tmap_mode("plot")
 tm_shape(bgmap) +
   tm_rgb(bgmap, r = 1, g = 2, b = 3, alpha = NA, saturation = 1, interpolate = TRUE, max.value = 255) +
   tm_shape(gps_path_selected) +
   tm_lines() +
-  tm_facets(by = "id", ncol = 3)
+  tm_facets(by = "day", ncol = 3)
 ```
 
 #### Network Visualisation and Analysis
 
-1) **Network analysis**- To visualize the possible associations between employees by analyzing their transaction history. Bipartite graphs are used as we are provided with credit card information showing employees transactions with each location. As there is no information on interactions between employees themselves, we will utilize a bipartite graph where two sets of vertices which are connected to each other, but not within themselves.
-
+1) **Network analysis**- To visualize the possible associations between employees by analyzing their transaction history. Bipartite graphs are used as we are provided with credit card information showing employees' transactions with each location. As there is no information on interactions between employees themselves, we will utilize a bipartite graph where two sets of vertices which are connected to each other, but not within themselves.<br>
 We have employed both the use of an interactive and static visualization.
-    - Interactive network graph- This allows the user to select any node on the graph and observe the interactions between this node and the other nodes will be highlighted, while the other nodes will be dulled. The interactive filtering option also allows user to select by department and id. In order to assess if the employees have crossed paths during their visits to certain locations, we will use the interactive network graph concurrently with an interactive datatable where filters have been enabled to allow filtering for the respective location.
-    
-    - Facet network graph- This allows us to visualize a single variable with many levels and arrange the plots in a more space efficient manner for easy comparison and analysis. In this case, we have presented a facet graph by day and timegroup, allowing users to observe the interactions between nodes for each timegroup in day 6.
 
-```{r, layout="l-body-outset", fig.width=8, fig.height=7, fig.cap="Interactivet network graph"}
+    - Interactive network graph- This allows the user to select any node on the graph and interactions between this node and the other nodes will be highlighted, while the other nodes will be dulled. The interactive filtering option also allows user to select by department and id. In order to assess if the employees have crossed paths during their visits to certain locations, we will use the interactive network graph concurrently with an interactive datatable where filters have been enabled to allow filtering for the respective location.
+    
+    - Facet network graph- This allows us to visualize a single variable with many levels and arrange the plots in a more space efficient manner for easy comparison and analysis. In this case, we have presented a facet graph by day and timegroup, allowing users to observe the interactions between nodes for each timegroup in the selected day.
+
+```{r, layout="l-body-outset", fig.width=8, fig.height=7, fig.cap="Interactive network graph"}
 ##Interactive viz
 visNetwork(cc_nodes, cc_edges, height = "800px", width = "100%") %>%
   visIgraphLayout(layout = "layout_in_circle") %>%
