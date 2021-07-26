@@ -1000,7 +1000,7 @@ DT::datatable(cc_data_cleaned_matched_DT, extensions='Scroller', filter = "top",
 gps_path_selected <- gps_path_cleaned %>%
   filter(id == 1, day == 13, hour == 19)
 
-tmap_mode("view")
+tmap_mode("plot")
 tm_shape(bgmap) +
   tm_rgb(bgmap, r = 1, g = 2, b = 3, alpha = NA, saturation = 1, interpolate = TRUE, max.value = 255) +
   tm_shape(gps_path_selected) +
@@ -1013,7 +1013,7 @@ tm_shape(bgmap) +
 gps_path_selected <- gps_path_cleaned %>%
   filter(id == 1, day == 13, hour == 13)
 
-tmap_mode("view")
+tmap_mode("plot")
 tm_shape(bgmap) +
   tm_rgb(bgmap, r = 1, g = 2, b = 3, alpha = NA, saturation = 1, interpolate = TRUE, max.value = 255) +
   tm_shape(gps_path_selected) +
@@ -1085,7 +1085,7 @@ The following employees have been visiting a similar location near Spetson Park 
 gps_path_selected <- gps_path_cleaned %>%
   filter(id == 10, hour == 17 | hour == 18)
   
-tmap_mode("view")
+tmap_mode("plot")
 tm_shape(bgmap) +
   tm_rgb(bgmap, r = 1, g = 2, b = 3, alpha = NA, saturation = 1, interpolate = TRUE, max.value = 255) +
   tm_shape(gps_path_selected) +
@@ -1098,7 +1098,7 @@ tm_shape(bgmap) +
 gps_path_selected <- gps_path_cleaned %>%
   filter(id == 15, day == 7)
   
-tmap_mode("view")
+tmap_mode("plot")
 tm_shape(bgmap) +
   tm_rgb(bgmap, r = 1, g = 2, b = 3, alpha = NA, saturation = 1, interpolate = TRUE, max.value = 255) +
   tm_shape(gps_path_selected) +
@@ -1111,7 +1111,7 @@ tm_shape(bgmap) +
 gps_path_selected <- gps_path_cleaned %>%
   filter(id == 16, day == 7)
   
-tmap_mode("view")
+tmap_mode("plot")
 tm_shape(bgmap) +
   tm_rgb(bgmap, r = 1, g = 2, b = 3, alpha = NA, saturation = 1, interpolate = TRUE, max.value = 255) +
   tm_shape(gps_path_selected) +
@@ -1147,7 +1147,7 @@ tm_shape(bgmap) +
 gps_path_selected <- gps_path_cleaned %>%
   filter(id == 15, day == 9)
   
-tmap_mode("view")
+tmap_mode("plot")
 tm_shape(bgmap) +
   tm_rgb(bgmap, r = 1, g = 2, b = 3, alpha = NA, saturation = 1, interpolate = TRUE, max.value = 255) +
   tm_shape(gps_path_selected) +
@@ -1160,7 +1160,7 @@ tm_shape(bgmap) +
 gps_path_selected <- gps_path_cleaned %>%
   filter(id == 24, day == 9, hour == 3)
   
-tmap_mode("view")
+tmap_mode("plot")
 tm_shape(bgmap) +
   tm_rgb(bgmap, r = 1, g = 2, b = 3, alpha = NA, saturation = 1, interpolate = TRUE, max.value = 255) +
   tm_shape(gps_path_selected) +
@@ -1177,7 +1177,7 @@ On 01/11/2014 night, Bertrand Ovan (Facilities Group Manager, CarID 29) visited 
 gps_path_selected <- gps_path_cleaned %>%
   filter(id == 29, day == 11, timegroup == "21-24")
   
-tmap_mode("view")
+tmap_mode("plot")
 tm_shape(bgmap) +
   tm_rgb(bgmap, r = 1, g = 2, b = 3, alpha = NA, saturation = 1, interpolate = TRUE, max.value = 255) +
   tm_shape(gps_path_selected) +
@@ -1243,7 +1243,7 @@ tmap_mode(current.mode)
 gps_path_selected <- gps_path_cleaned %>%
   filter(id == 24, day == 14)
   
-tmap_mode("view")
+tmap_mode("plot")
 tm_shape(bgmap) +
   tm_rgb(bgmap, r = 1, g = 2, b = 3, alpha = NA, saturation = 1, interpolate = TRUE, max.value = 255) +
   tm_shape(gps_path_selected) +
@@ -1256,7 +1256,7 @@ tm_shape(bgmap) +
 gps_path_selected <- gps_path_cleaned %>%
   filter(id == 21, day == 11)
   
-tmap_mode("view")
+tmap_mode("plot")
 tm_shape(bgmap) +
   tm_rgb(bgmap, r = 1, g = 2, b = 3, alpha = NA, saturation = 1, interpolate = TRUE, max.value = 255) +
   tm_shape(gps_path_selected) +
@@ -1381,10 +1381,10 @@ tm_shape(bgmap) +
 
 Given that there are relatively few records at gas stations (U-Pump and Frank's Fuels), we assume that GasTech provides free petrol for their employee cars. Scanning through the few records at gas stations using the datatable below, we note the following:
 
-    - Varja Lagos (Badging Office, CarID 23) made a transaction at U-Pump on 01/06/2014 at 1728.
-    - Nils Calixto (IT Helpdesk, CarID 1) made a transaction at U-Pump on 01/13/2014 at 1318.
-    - Loreto Bodrogi (Site Control, CarID 15) made a transaction at Frank's Fuel on 01/08/2014 at 1229.
-    - Felix Balas (Engineer, CarID 3) made a transaction at Frank's Fuel on 01/18/2014 at 1839.
+- Varja Lagos (Badging Office, CarID 23) made a transaction at U-Pump on 01/06/2014 at 1728.
+- Nils Calixto (IT Helpdesk, CarID 1) made a transaction at U-Pump on 01/13/2014 at 1318.
+- Loreto Bodrogi (Site Control, CarID 15) made a transaction at Frank's Fuel on 01/08/2014 at 1229.
+- Felix Balas (Engineer, CarID 3) made a transaction at Frank's Fuel on 01/18/2014 at 1839.
 
 ```{r, tidy.opts=list(width.cutoff=55),tidy=TRUE, layout="l-body-outset", fig.width=12, fig.height=10, fig.cap="Datatable of credit card transactions"}
 cc_data_cleaned_matched_DT <- subset(cc_data_cleaned_matched, select = -c(daynumber))
@@ -1402,7 +1402,7 @@ Lastly, Bertrand Ovan (Facilities Group Manager, CarID29) drove around the city 
 gps_path_selected <- gps_path_cleaned %>%
   filter(id == 1, day == 13, hour == 13)
   
-tmap_mode("view")
+tmap_mode("plot")
 tm_shape(bgmap) +
   tm_rgb(bgmap, r = 1, g = 2, b = 3, alpha = NA, saturation = 1, interpolate = TRUE, max.value = 255) +
   tm_shape(gps_path_selected) +
@@ -1415,7 +1415,7 @@ tm_shape(bgmap) +
 gps_path_selected <- gps_path_cleaned %>%
   filter(id == 24, day == 13, hour == 12 | hour == 13)
   
-tmap_mode("view")
+tmap_mode("plot")
 tm_shape(bgmap) +
   tm_rgb(bgmap, r = 1, g = 2, b = 3, alpha = NA, saturation = 1, interpolate = TRUE, max.value = 255) +
   tm_shape(gps_path_selected) +
@@ -1428,7 +1428,7 @@ tm_shape(bgmap) +
 gps_path_selected <- gps_path_cleaned %>%
   filter(id == 29, day == 11, hour == 22 | hour == 23)
   
-tmap_mode("view")
+tmap_mode("plot")
 tm_shape(bgmap) +
   tm_rgb(bgmap, r = 1, g = 2, b = 3, alpha = NA, saturation = 1, interpolate = TRUE, max.value = 255) +
   tm_shape(gps_path_selected) +
@@ -1440,11 +1440,11 @@ tm_shape(bgmap) +
 
 We noted that for most days across the two weeks analyzed, trucks are usually not used after 1700, with the exception of the below:
 
-    - On 01/13/2014, CarID 101 made 2  trips around the lower half of Abila, finally ending at Gastech at 1857.
-    - On 01/13/2014, CarID 104 was returning from Abila Airport at 1711, arriving at Gastech at 1717. 
-    - On 01/15/2014, CarID 107 departed Gastech for an area west of Maximum Iron and Steel arriving at 1727 and departed at 1813, arriving at Abila Hospital at 1825.
-    - On 01/17/2014, CarID 107 departed Nationwide Refinery for Abila Port, arriving at 1716 and departed almost immediately back to Gastech, arriving at 1721.
-    - CarID 101, 104, 105 and 106 were operating till late from 1700 to 2106 on 01/16/2014. This is unusual given that trucks are usually not used after 1700.
+- On 01/13/2014, CarID 101 made 2  trips around the lower half of Abila, finally ending at Gastech at 1857.
+- On 01/13/2014, CarID 104 was returning from Abila Airport at 1711, arriving at Gastech at 1717. 
+- On 01/15/2014, CarID 107 departed Gastech for an area west of Maximum Iron and Steel arriving at 1727 and departed at 1813, arriving at Abila Hospital at 1825.
+- On 01/17/2014, CarID 107 departed Nationwide Refinery for Abila Port, arriving at 1716 and departed almost immediately back to Gastech, arriving at 1721.
+- CarID 101, 104, 105 and 106 were operating till late from 1700 to 2106 on 01/16/2014. This is unusual given that trucks are usually not used after 1700.
 
 ```{r, tidy.opts=list(width.cutoff=60),tidy=TRUE, layout="l-body-outset", fig.width=6, fig.height=3, fig.cap="Facet graph by day of the various truck trajectories during 1700-2359"}
 ##Facet map- by day
@@ -1495,7 +1495,7 @@ tm_shape(bgmap) +
 gps_path_selected <- gps_path_cleaned %>%
   filter(id == 23,  day == 18 | day == 19)
   
-tmap_mode("view")
+tmap_mode("plot")
 tm_shape(bgmap) +
   tm_rgb(bgmap, r = 1, g = 2, b = 3, alpha = NA, saturation = 1, interpolate = TRUE, max.value = 255) +
   tm_shape(gps_path_selected) +
@@ -1546,7 +1546,7 @@ This is suspicious as the government sits at the Capitol and hence these employe
 gps_path_selected <- gps_path_cleaned %>%
   filter(id == 35, day == 11, timegroup == "13-16" | timegroup == "17-20")
   
-tmap_mode("view")
+tmap_mode("plot")
 tm_shape(bgmap) +
   tm_rgb(bgmap, r = 1, g = 2, b = 3, alpha = NA, saturation = 1, interpolate = TRUE, max.value = 255) +
   tm_shape(gps_path_selected) +
@@ -1559,7 +1559,7 @@ tm_shape(bgmap) +
 gps_path_selected <- gps_path_cleaned %>%
   filter(id == 15 | id == 34 | id == 22 | id == 28, day == 18)
   
-tmap_mode("view")
+tmap_mode("plot")
 tm_shape(bgmap) +
   tm_rgb(bgmap, r = 1, g = 2, b = 3, alpha = NA, saturation = 1, interpolate = TRUE, max.value = 255) +
   tm_shape(gps_path_selected) +
@@ -1576,7 +1576,7 @@ We noted that CarID 28 trajectories are chaotic. This car is being assigned to I
 gps_path_selected <- gps_path_cleaned %>%
   filter(id == 28)
   
-tmap_mode("view")
+tmap_mode("plot")
 tm_shape(bgmap) +
   tm_rgb(bgmap, r = 1, g = 2, b = 3, alpha = NA, saturation = 1, interpolate = TRUE, max.value = 255) +
   tm_shape(gps_path_selected) +
